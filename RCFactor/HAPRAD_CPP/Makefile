@@ -10,6 +10,8 @@ ROOTCONFIG  := root-config
 ROOTCFLAGS  := $(shell $(ROOTCONFIG) --cflags)
 ROOTLDFLAGS := $(shell $(ROOTCONFIG) --ldflags)
 ROOTLIBS    := $(shell $(ROOTCONFIG) --libs)
+ROOTLIBDIR  := $(shell $(ROOTCONFIG) --libdir)
+ROOTINCDIR  := $(shell $(ROOTCONFIG) --incdir)
 ROOTCINT    := rootcint
 
 ifeq "$(DEBUG)" ""
@@ -18,11 +20,11 @@ else
 CXXFLAGS += -g -fPIC
 endif
 
-ifeq ($(findstring Linux,$(OS_NAME)),Linux)
-CXX       := g++  -fPIC 
-CXXFLAGS  += -Wall $(ROOTCFLAGS) $(SET_DEBUG) \
-    ./configure--enable-shared_dependencies
-endif
+#ifeq ($(findstring Linux,$(OS_NAME)),Linux)
+#CXX       := g++  -fPIC 
+#CXXFLAGS  += -Wall $(ROOTCFLAGS) $(SET_DEBUG) \
+#    ./configure--enable-shared_dependencies
+#endif
 
 LD        = g++ -fPIC 
 LDFLAGS   = -O2 $(ROOTLDFLAGS) -lgfortran 

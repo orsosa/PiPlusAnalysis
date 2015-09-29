@@ -32,7 +32,7 @@ SOFLAGS   = -Wl,-soname,$(notdir $@) -shared
 
 INCLUDES  := -I$(ROOTINCDIR)
 LOCALINCLUDES := -I.
-LIBS      := -L$(ROOTLIBDIR) -lMathMore
+LIBS      := -L/home/rodrigo/Downloads/root/lib/ -lMathMore
 
 
 SLIB_DIR := slib

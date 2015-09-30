@@ -1,0 +1,35 @@
+[Data]
+Dir /home/rodrigo/Data/PhiRatio/
+fDataExt _data_
+fSimuExt _simul_
+nSimuFiles 4
+elecExt elec.root
+pionExt pion.root
+
+[Cuts]
+Q2_MIN 1
+Q2_MAX 4
+XB_MIN 0.1
+XB_MAX 0.55
+NU_MIN 2.2
+NU_MAX 4.2
+ZH_MIN 0
+ZH_MAX 1
+PT_MIN 0
+PT_MAX 1
+PHI_MIN -180
+PHI_MAX 180
+N_Q2 6
+N_ZH 10
+N_XB 5
+N_PHI 12
+N_PT 5
+N_NU 10
+
+[RCFactor]
+
+
+# Input argument order
+# Q2_MIN Q2_MAX N_Q2 XB_MIN XB_MAX N_XB NU_MIN NU_MAX N_NU ZH_MIN ZH_MAX N_ZH PT_MIN PT_MAX N_PT PHI_MIN PHI_MAX N_PHI \
+# Dir fDataExt fSimuExt nSimuFiles elecExt pionExt
+

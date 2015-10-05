@@ -5,7 +5,6 @@
 #include <map>
 
 TString dataLoc;
-
 TString fDataExt;
 TString fSimuExt;
 TString elecExt;
@@ -33,6 +32,8 @@ Int_t N_ZH;
 Int_t N_PT;
 Int_t N_PHI;
 
+Int_t XF_POS = 0;
+
 Double_t delta_Q2;
 Double_t delta_XB;
 Double_t delta_NU;
@@ -57,7 +58,7 @@ Double_t *****rcFactorD;
 const Double_t kMassProton = 0.938272;
 
 int main(int argc, char **argv){
-	if(argc != 25){
+	if(argc < 25){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 	}
 	
@@ -86,6 +87,8 @@ int main(int argc, char **argv){
 	nSimuFiles = (Int_t) std::stoi(argv[22]);
 	elecExt = (TString) argv[23];
 	pionExt = (TString) argv[24];
+
+	if(argc == 26) XF_POS = (Int_t) std::stoi(argv[25]);
 
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;
@@ -133,7 +136,7 @@ void RCFactors(){
     TString metal;
     ifstream inRC;
     Int_t Q2i, Xbi, Zhi, Pti, Phii;
-    Float_t sigb, sigob, tail1, tail2, facno, fact; 
+    Float_t sigb, sigob, tail1, tail2, facno, fact;
     for(Int_t r = 0; r < 4; r++){
         if(r == 0) metal = "C";
         else if(r == 1) metal = "Fe";
@@ -552,9 +555,8 @@ void runSimulXb(const Char_t Metal[]){
     TH1F *h_thr[N_Q2][N_ZH][N_PT][N_PHI];
     
     TChain *accept = new TChain("accept_pion");
-	for(Int_t q = 0; q < nSimuFiles; q++){
+	for(Int_t q = 0; q < nSimuFiles; q++)
 		accept->Add(dataLoc + Metal + std::itoa(q+1) + fSimuExt + pionExt);
-	}
     nentries = accept->GetEntries();
     accept->SetEstimate(nentries);
     accept->Draw(">>list_accept", Zh_cut && Xb_cut, "goff");

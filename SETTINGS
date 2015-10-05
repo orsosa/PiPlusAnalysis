@@ -1,5 +1,5 @@
 [Data]
-Dir /home/rodrigo/Data/PhiRatio/
+DataDir /home/rodrigo/Data/PhiRatio/
 fDataExt _data_
 fSimuExt _simul_
 nSimuFiles 4
@@ -25,11 +25,21 @@ N_XB 5
 N_PHI 12
 N_PT 5
 N_NU 10
+XF_POS 0 
 
 [RCFactor]
+RCFactorON 1
+RecreateRC 0
+RCDir /home/rodrigo/github/PiPlusAnalysis/RCFactor/
 
+[MRatio]
+
+[Broadening]
 
 # Input argument order
 # Q2_MIN Q2_MAX N_Q2 XB_MIN XB_MAX N_XB NU_MIN NU_MAX N_NU ZH_MIN ZH_MAX N_ZH PT_MIN PT_MAX N_PT PHI_MIN PHI_MAX N_PHI \
 # Dir fDataExt fSimuExt nSimuFiles elecExt pionExt
 
+# XF_POS 0  (No XfCut)
+# XF_POS 1  (Xf > 0)
+# XF_POS -1 (Xf < 0)

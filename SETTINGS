@@ -25,7 +25,8 @@ N_XB 5
 N_PHI 12
 N_PT 5
 N_NU 10
-XF_POS 0 
+XF_POS 0
+NU_BIN 0 # Indicates if it will be using Xb (NU_BIN = 0) or Nu (NU_BIN = 1)
 
 [RCFactor]
 RCFactorON 1

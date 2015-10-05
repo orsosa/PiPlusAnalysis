@@ -117,8 +117,7 @@ void run_file(const Char_t Metal[], Double_t Q2_MIN, Double_t Q2_MAX, Double_t X
     delete thrown;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
 	TString Metal;
 	TString rootFName;
 

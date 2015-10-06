@@ -1,0 +1,14 @@
+cd $GITPIPLUS/ClasToolPack/ClasTool
+make clean
+make distclean
+cd $GITPIPLUS/ClasToolPack/Analyser/analysis_lib
+make clean
+make distclean
+cd $GITPIPLUS/RCFactor/HAPRAD_CPP
+make clean
+cd $GITPIPLUS/RCFactor/Gen5DimData
+make clean
+cd $GITPIPLUS/RCFactor/GenRC
+make clean
+cd $GITPIPLUS/RCFactor/PhiHist
+make clean

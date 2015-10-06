@@ -16,7 +16,7 @@ CXXFLAGS  += -O2 -Wall -fPIC $(ROOTCFLAGS)
 LD        = g++
 LDFLAGS   = -O2 $(ROOTLDFLAGS)
 
-INCLUDES  := $(ROOTINCDIR)
+INCLUDES  := -I/$(ROOTINCDIR)
 LIBS      := $(ROOTLIBS)
 
 ##############################################################################

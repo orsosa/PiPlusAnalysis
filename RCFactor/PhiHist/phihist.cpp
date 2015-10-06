@@ -7,8 +7,6 @@
 #include "TH1.h"
 #include "TF1.h"
 
-Int_t NU_BIN;
-
 const Int_t N_METAL = 4;
 
 int main(int argc, char **argv)
@@ -21,7 +19,7 @@ int main(int argc, char **argv)
 	TF1 *func;
 	TString Metal;
 	
-	Double_t Q2, Xb, Nu, Zh, Pt, Phi, Val, Err;
+	Double_t Q2, Xb, Zh, Pt, Phi, Val, Err;
 	Double_t A, Ac, Acc;
 	Double_t AErr, AcErr, AccErr;
 	Double_t sumChi;
@@ -41,10 +39,7 @@ int main(int argc, char **argv)
 		newntuple = new TNtuple("AAcAcc_data", "AAcAcc_data", "Q2:Xb:Zh:Pt:A:AErr:Ac:AcErr:Acc:AccErr:ChiSQ");
 		func = new TF1("fit", "[0]+TMath::Cos(x*TMath::Pi()/180)*[1]+TMath::Cos(2*x*TMath::Pi()/180)*[2]");
 
-		if(NU_BIN)
-			ntuple->SetBranchAddress("Nu", &Nu);
-		else
-			ntuple->SetBranchAddress("Xb", &Xb);
+		ntuple->SetBranchAddress("Xb", &Xb);
 		ntuple->SetBranchAddress("Q2", &Q2);
 		ntuple->SetBranchAddress("Xb", &Xb);
 		ntuple->SetBranchAddress("Zh", &Zh);
@@ -84,7 +79,7 @@ int main(int argc, char **argv)
 		f->Close();
 		delete f;
 
-		newf = new TFile(Metal + "phihist.root", "RECREATE");
+		newf = new TFile(Metal + "newphihist.root", "RECREATE");
 		newf->cd();
 		newntuple->Write();
 		newf->Close();

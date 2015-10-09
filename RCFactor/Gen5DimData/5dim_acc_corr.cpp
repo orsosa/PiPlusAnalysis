@@ -47,14 +47,16 @@ Double_t delta_ZH;
 Double_t delta_PT;
 Double_t delta_PHI;
 
-const Int_t N_METAL = 4;
+const Int_t N_METAL = 6;
 
 TFile *plots;
 TNtuple *fit_data;
+TChain *fntuple;
+TChain *faccept;
+TChain *fthrown;
 
-void run_file(const Char_t Metal[], Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, Double_t XB_MAX, Double_t ZH_MIN, Double_t ZH_MAX, Double_t PT_MIN, Double_t PT_MAX)
+void run_file(TChain *ntuple, TChain *accept, TChain *thrown, TString Metal,Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, Double_t XB_MAX, Double_t ZH_MIN, Double_t ZH_MAX, Double_t PT_MIN, Double_t PT_MAX)
 {
-    TCut P_cut = Form("((T4>-0.55 && P<2.7) || P>2.7)");
     TCut Q2_cut = Form("Q2>%f && Q2<%f", Q2_MIN, Q2_MAX);
     TCut Xb_cut = Form("Xb>%f && Xb<%f", XB_MIN, XB_MAX);
     TCut Zh_cut = Form("Zh>%f && Zh<%f", ZH_MIN, ZH_MAX);
@@ -64,28 +66,20 @@ void run_file(const Char_t Metal[], Double_t Q2_MIN, Double_t Q2_MAX, Double_t X
 	if(XF_POS == 1) Xf_cut = Form("Xf>0");
 	if(XF_POS == -1) Xf_cut = Form("Xf<0");
 	TCut Target_cut;
-	if(Metal == "D")
+	if(Metal(0,1) == "D")
     	Target_cut = Form("TargType==%d", 1);
 	else
 		Target_cut = Form("TargType==%d", 2);
 
-    TCut cuts = P_cut && Q2_cut && Xb_cut && Zh_cut && Pt_cut && Xf_cut && Target_cut;
-    TCut cuts_simul = P_cut && Q2_cut && Xb_cut && Zh_cut&& Pt_cut && Xf_cut;
+    TCut cuts = Q2_cut && Xb_cut && Zh_cut && Pt_cut && Xf_cut && Target_cut;
+    TCut cuts_simul = Q2_cut && Xb_cut && Zh_cut&& Pt_cut && Xf_cut;
 
-    TChain *ntuple = new TChain("data_pion");
-    ntuple->Add(dataLoc + Metal + fDataExt + pionExt);
     ntuple->Draw(">>list", cuts, "goff");
     ntuple->SetEventList((TEventList*) gDirectory->Get("list"));
 
-    TChain *accept = new TChain("accept_pion");
-	for(Int_t q = 0; q < nSimuFiles; q++)
-		accept->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt);
     accept->Draw(">>list_acc",cuts_simul,"goff");
     accept->SetEventList((TEventList*) gDirectory->Get("list_acc"));
 
-    TChain *thrown = new TChain("thrown_pion");
-	for(Int_t q = 0; q < nSimuFiles; q++)
-		thrown->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt);
     thrown->Draw(">>list_thr", cuts_simul, "goff");
     thrown->SetEventList((TEventList*)gDirectory->Get("list_thr"));
 
@@ -112,14 +106,12 @@ void run_file(const Char_t Metal[], Double_t Q2_MIN, Double_t Q2_MAX, Double_t X
     
     delete htmp_acc_ratio;
     delete htmp_data_corr;
-    delete ntuple;
-    delete accept;
-    delete thrown;
 }
 
 int main(int argc, char **argv)
 {
 	TString Metal;
+	TString MetalD;
 	TString rootFName;
 
 	if(argc < 25){
@@ -165,15 +157,42 @@ int main(int argc, char **argv)
 		if(met == 0) Metal = "C";
 		else if(met == 1) Metal = "Fe";
 		else if(met == 2) Metal = "Pb";
-		else if(met == 3) Metal = "D";
+		else if(met == 3) Metal = "D_C";
+		else if(met == 4) Metal = "D_Fe";
+		else if(met == 5) Metal = "D_Pb";
 		rootFName = Metal + "_5_dim_dist.root";
 		plots = new TFile(rootFName, "RECREATE");
 		fit_data = new TNtuple("fit_data", "DATA FOR 5 DIM FIT", "Q2:Xb:Zh:Pt:Phi:Val:Err");
+
+		std::cout << "Adding files to TChain" << std::endl;
+		if(Metal(0,1) != "D"){
+			fntuple = new TChain("data_pion");
+			fntuple->Add(dataLoc + Metal + fDataExt + pionExt);
+			faccept = new TChain("accept_pion");
+			for(Int_t q = 0; q < nSimuFiles; q++)
+				faccept->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);
+			fthrown = new TChain("thrown_pion");
+			for(Int_t q = 0; q < nSimuFiles; q++)
+				fthrown->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);		
+		}
+		else{
+			MetalD = Metal(2,2);
+			fntuple = new TChain("data_pion");
+			fntuple->Add(dataLoc + MetalD + fDataExt + pionExt);
+			faccept = new TChain("accept_pion");
+			for(Int_t q = 0; q < nSimuFiles; q++)
+				faccept->Add(dataLoc + Metal(0,1) + std::to_string(q+1) + fSimuExt + pionExt);
+			fthrown = new TChain("thrown_pion");
+			for(Int_t q = 0; q < nSimuFiles; q++)
+				fthrown->Add(dataLoc + Metal(0,1) + std::to_string(q+1) + fSimuExt + pionExt);
+		}
+
 		for(Int_t i = 0; i < N_Q2; i++){
 		    for(Int_t j = 0; j < N_XB; j++){
 		        for(Int_t k = 0; k < N_ZH; k++){
 		            for(Int_t l = 0; l < N_PT; l++){
-		                run_file(Metal, Q2_MIN+i*delta_Q2, Q2_MIN+(i+1)*delta_Q2,
+		                run_file(fntuple, faccept, fthrown, Metal,
+									Q2_MIN+i*delta_Q2, Q2_MIN+(i+1)*delta_Q2,
 		                            XB_MIN+j*delta_XB, XB_MIN+(j+1)*delta_XB,
 		                            ZH_MIN+k*delta_ZH, ZH_MIN+(k+1)*delta_ZH,
 		                            PT_MIN+l*delta_PT, PT_MIN+(l+1)*delta_PT);
@@ -183,11 +202,21 @@ int main(int argc, char **argv)
 		    }
 		}
 		plots->cd();
+		std::cout << "Writing ntuple to file" << std::endl;
 		fit_data->Write();
+		std::cout << "Deleting ntuple from memory" << std::endl;
+		fit_data->Delete();
+		std::cout << "Closing file" << std::endl;
 		plots->Close();
 
+		std::cout << "Deleting FNtuple" << std::endl;
+		delete fntuple;
+		std::cout << "Deleting FAccept" << std::endl;
+		delete faccept;
+		std::cout << "Deleting FThrown" << std::endl;
+		delete fthrown;
+		std::cout << "Deleting Plots" << std::endl;
 		delete plots;
-		delete fit_data;
 	}
 
     return 0;

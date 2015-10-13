@@ -74,15 +74,20 @@ void RCFactors();
 
 void runVar(TString depVar);
 
-void runDataVar(TString depVar, const Char_t Metal[]);
+void runDataVar(TString depVar, TString Metal);
 
-void runSimulVar(TString depVar, const Char_t Metal[]);
+void runSimulVar(TString depVar, TString Metal);
 
 void GetNel(TString Metal, Double_t Xb_min, Double_t Xb_max, Double_t Q2_min, Double_t Q2_max);
 
 int main(int argc, char **argv){
+	for(Int_t i = 0; i < argc; i++){
+		std::cout << "Arg " << i << std::endl;
+		std::cout << argv[i] << std::endl;
+	}
 	if(argc < 26){
 		std::cout << "The number of arguments is incorrect" << std::endl;
+		std::cout << argc << std::endl;
 	}
 	
 	Q2_MIN = (Double_t) std::stod(argv[1]);
@@ -584,7 +589,7 @@ void runVar(TString depVar){
     return;                                 
 }
 
-void runDataVar(TString depVar, const Char_t Metal[]){
+void runDataVar(TString depVar, TString Metal){
     TCut liquid = "TargType==1";
     TCut solid = "TargType==2";    
     TCut cuts;
@@ -654,10 +659,10 @@ void runDataVar(TString depVar, const Char_t Metal[]){
                     cuts = var1cut && var2cut && var3cut && var4cut;
                     ntuplePion->Draw((const char*) Form("%s>>htmp_l(%d,%f,%f)", (const char*)depVar, N_VAR, depV_MIN, depV_MAX), liquid && cuts, "goff");
                     h_l[j][k][l][m] = (TH1F*) gDirectory->GetList()->FindObject("htmp_l");
-                    h_l[j][k][l][m]->SetName((const char*) Form("h_%s_l%d%d%d%d", Metal, j, k, l, m));            
+                    h_l[j][k][l][m]->SetName((const char*) Form("h_%s_l%d%d%d%d", (const char*)Metal, j, k, l, m));            
                     ntuplePion->Draw((const char*) Form("%s>>htmp_s(%d,%f,%f)", (const char*)depVar, N_VAR, depV_MIN, depV_MAX), solid && cuts, "goff");
                     h_s[j][k][l][m] = (TH1F*) gDirectory->GetList()->FindObject("htmp_s");
-                    h_s[j][k][l][m]->SetName((const char*) Form("h_%s_s%d%d%d%d", Metal, j, k, l, m));
+                    h_s[j][k][l][m]->SetName((const char*) Form("h_%s_s%d%d%d%d", (const char*)Metal, j, k, l, m));
                 }
             }                 
         }
@@ -681,7 +686,7 @@ void runDataVar(TString depVar, const Char_t Metal[]){
     delete fPion;              
 }
 
-void runSimulVar(TString depVar, const Char_t Metal[]){
+void runSimulVar(TString depVar, TString Metal){
     TCut liquid = "TargType==1";
     TCut solid = "TargType==2";    
     TCut cuts;
@@ -764,10 +769,10 @@ void runSimulVar(TString depVar, const Char_t Metal[]){
                     cuts = var1cut && var2cut && var3cut && var4cut;
                     accept->Draw((const char*) Form("%s>>htmp_acc(%d,%f,%f)", (const char*)depVar, N_VAR, depV_MIN, depV_MAX), cuts,"goff");
                     h_acc[j][k][l][m] = (TH1F*) gDirectory->GetList()->FindObject("htmp_acc");
-                    h_acc[j][k][l][m]->SetName((const char*) Form("h_%s_acc%d%d%d%d", Metal, j, k, l, m));
+                    h_acc[j][k][l][m]->SetName((const char*) Form("h_%s_acc%d%d%d%d", (const char*)Metal, j, k, l, m));
                     thrown->Draw((const char*) Form("%s>>htmp_thr(%d,%f,%f)", (const char*)depVar, N_VAR, depV_MIN, depV_MAX), cuts,"goff");
                     h_thr[j][k][l][m] = (TH1F*) gDirectory->GetList()->FindObject("htmp_thr");
-                    h_thr[j][k][l][m]->SetName((const char*) Form("h_%s_thr%d%d%d%d", Metal, j, k, l, m));
+                    h_thr[j][k][l][m]->SetName((const char*) Form("h_%s_thr%d%d%d%d", (const char*)Metal, j, k, l, m));
                 }
             }           
         }

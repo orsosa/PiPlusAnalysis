@@ -30,7 +30,7 @@ do
 	readset NU_MIN "$line"
 	readset NU_MAX "$line"
 	readset ZH_MIN "$line"
-	readset ZH_MAX" $line"
+	readset ZH_MAX "$line"
 	readset PT_MIN "$line"
 	readset PT_MAX "$line"
 	readset PHI_MIN "$line"
@@ -47,3 +47,14 @@ do
 	readset RecreateRC "$line"
 	readset RCDir "$line"
 done < "$filename"
+
+if [ "$RecreateRC" = '1' ]; then
+	if [ "$RecreateRC" = '1' ]; then
+		echo "hola"
+	else
+		echo "hola2"
+	fi
+else
+	cd $GITPIPLUS/MRatio
+	./MRatioDep "$Q2_MIN" "$Q2_MAX" "$N_Q2" "$XB_MIN" "$XB_MAX" "$N_XB" "$NU_MIN" "$NU_MAX" "$N_NU" "$ZH_MIN" "$ZH_MAX" "$N_ZH" "$PT_MIN" "$PT_MAX" "$N_PT" "$PHI_MIN" "$PHI_MAX" "$N_PHI" "$DataDir" "$fDataExt" "$fSimuExt" "$nSimuFiles" "$elecExt" "$pionExt" "Zh" "0"
+fi

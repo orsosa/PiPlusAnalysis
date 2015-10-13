@@ -6,8 +6,9 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TCanvas.h"
 
-const Int_t N_METAL = 4;
+const Int_t N_METAL = 6;
 
 int main(int argc, char **argv)
 {
@@ -18,11 +19,17 @@ int main(int argc, char **argv)
 	TH1F *h1;
 	TF1 *func;
 	TString Metal;
+	TString dataLoc;
 	
-	Double_t Q2, Xb, Zh, Pt, Phi, Val, Err;
-	Double_t A, Ac, Acc;
-	Double_t AErr, AcErr, AccErr;
-	Double_t sumChi;
+	if(argc == 2)
+		dataLoc = argv[1];
+	else
+		dataLoc = "";
+	
+	Float_t Q2, Xb, Zh, Pt, Phi, Val, Err;
+	Float_t A, Ac, Acc;
+	Float_t AErr, AcErr, AccErr;
+	Float_t ChiSQ;
 
 	Int_t nentries, empty;
 
@@ -30,15 +37,17 @@ int main(int argc, char **argv)
 		if(met == 0) Metal = "C";
 		else if(met == 1) Metal = "Fe";
 		else if(met == 2) Metal = "Pb";
-		else if(met == 3) Metal = "D";
-		f = new TFile("../Gen5DimData/" + Metal + "_5_dim_dist.root", "UPDATE");
+		else if(met == 3) Metal = "D_C";
+		else if(met == 4) Metal = "D_Fe";
+		else if(met == 5) Metal = "D_Pb";
+		
+		if(dataLoc == "")
+			f = new TFile("../Gen5DimData/" + Metal + "_5_dim_dist.root", "READ");
+		else
+			f = new TFile(dataLoc + Metal + "_5_dim_dist.root", "READ");
 		ntuple = (TNtuple*) f->Get("fit_data");
 
 		nentries = ntuple->GetEntries();
-
-		newntuple = new TNtuple("AAcAcc_data", "AAcAcc_data", "Q2:Xb:Zh:Pt:A:AErr:Ac:AcErr:Acc:AccErr:ChiSQ");
-		func = new TF1("fit", "[0]+TMath::Cos(x*TMath::Pi()/180)*[1]+TMath::Cos(2*x*TMath::Pi()/180)*[2]");
-
 		ntuple->SetBranchAddress("Xb", &Xb);
 		ntuple->SetBranchAddress("Q2", &Q2);
 		ntuple->SetBranchAddress("Xb", &Xb);
@@ -48,43 +57,50 @@ int main(int argc, char **argv)
 		ntuple->SetBranchAddress("Val", &Val);
 		ntuple->SetBranchAddress("Err", &Err);
 
-		for(Int_t i = 0; i < nentries; i = i + 12){
+		newntuple = new TNtuple("AAcAcc_data", "AAcAcc_data", "Q2:Xb:Zh:Pt:A:AErr:Ac:AcErr:Acc:AccErr:ChiSQ");
+		func = new TF1("fit", "[0]+TMath::Cos(x*TMath::Pi()/180)*[1]+TMath::Cos(2*x*TMath::Pi()/180)*[2]");
+
+		newf = new TFile(Metal + "newphihist.root", "RECREATE");
+		newf->cd();
+
+		for(Int_t i = 0; i < nentries; i = i + N_PHI){
 			ntuple->GetEntry(i);
 			h1 = new TH1F((const char*) Form("PhiDist Q2=%.3f Xb=%.3f Zh=%.3f Pt=%.3f", Q2, Xb, Zh, Pt), 
-							(const char*) Form("PhiDist Q2=%.3f Xb=%.3f Zh=%.3f Pt=%.3f", Q2, Xb, Zh, Pt), 12, -180, 180);
+							(const char*) Form("PhiDist Q2=%.3f Xb=%.3f Zh=%.3f Pt=%.3f", Q2, Xb, Zh, Pt), N_PHI, PHI_MIN, PHI_MAX);
 			empty = 0;
-			for(Int_t j = 1; j <= 12; j++){
+			for(Int_t j = 1; j <= N_PHI; j++){
 				ntuple->GetEntry(i+j-1);
 				h1->SetBinContent(j, Val);
 				if(h1->GetBinContent(j) == 0)
 					empty++;
 				h1->SetBinError(j, Err*1.04);
 			}
-			if(empty != 12){
-				h1->Fit(func);
+			if(empty < N_PHI){
+				h1->Fit(func, "q");
 				h1->Write();
 				if(func->GetNDF() != 0){
-					sumChi = func->GetChisquare();
+					ChiSQ = func->GetChisquare();
 					A = func->GetParameter(0);
 					AErr = func->GetParError(0);
 					Ac = func->GetParameter(1);
 					AcErr = func->GetParError(1);
 					Acc = func->GetParameter(2);
 					AccErr = func->GetParError(2);
-					newntuple->Fill(Q2, Xb, Zh, Pt, A, AErr, Ac, AcErr, Acc, AccErr, sumChi);
+					newntuple->Fill(Q2, Xb, Zh, Pt, A, AErr, Ac, AcErr, Acc, AccErr, ChiSQ);
 				}
 			}
-			delete h1;
+			h1->Delete();
 		}
-		f->Close();
-		delete f;
-
-		newf = new TFile(Metal + "newphihist.root", "RECREATE");
+		
+		delete ntuple;
+		
 		newf->cd();
 		newntuple->Write();
+		newntuple->Delete();
 		newf->Close();
-		delete newntuple;
-		delete newf;		
+		delete newf;
+		f->Close();
+		delete f;
 	}
-	return 0;	
+	return 0;
 }

@@ -61,7 +61,16 @@ Double_t *v_PHI;
 
 std::map<TString, Double_t> N_el;
 
+Float_t *rcFactorC;
+Float_t *rcFactorFe;
+Float_t *rcFactorPb;
+Float_t *rcFactorDC;
+Float_t *rcFactorDFe;
+Float_t *rcFactorDPb;
+
 const Double_t kMassProton = 0.938272;
+
+void RCFactors();
 
 void runVar(TString depVar);
 
@@ -142,7 +151,73 @@ int main(int argc, char **argv){
         else v_PHI[i] = v_PHI[i-1] + delta_PHI;
     }
 
+	Int_t NTot;
+
+	if(RCOn){
+		NTot = N_XB*N_Q2*N_ZH*N_PT*N_PHI;
+		rcFactorC = new Float_t[NTot];
+		rcFactorFe = new Float_t[NTot];
+		rcFactorPb = new Float_t[NTot];
+		rcFactorDC = new Float_t[NTot];
+		rcFactorDFe = new Float_t[NTot];
+		rcFactorDPb = new Float_t[NTot];
+		RCFactors();
+	}
+
 	runVar(depVar);
+}
+
+void RCFactors(){
+    TString Metal, Aux;
+    ifstream inRC;
+	Int_t index;
+    Int_t Q2i, Xbi, Zhi, Pti, Phii;
+    Float_t sigb, sigob, tail1, tail2, facno, fact; 
+    for(Int_t met = 0; met < 6; met++){
+        if(met == 0) Metal = "C";
+        else if(met == 1) Metal = "Fe";
+        else if(met == 2) Metal = "Pb";
+        else if(met == 3) Metal = "DC";
+		else if(met == 4) Metal = "DFe";
+		else if(met == 5) Metal = "DPb";
+        inRC.open("RCFactor" + Metal + ".txt");
+        if(inRC.is_open() == 0){
+            std::cout << "File RCFactor" << Metal << ".txt not found " << std::endl;
+            return;
+        }        
+        for(Int_t i = 0; i < 11; i++){
+            inRC >> Aux;
+        }
+        for(Int_t i = 0; i < N_XB; i++){
+            for(Int_t j = 0; j < N_Q2; j++){
+                for(Int_t k = 0; k < N_ZH; k++){
+                    for(Int_t l = 0; l < N_PT; l++){
+                        for(Int_t m = 0; m < N_PHI; m++){
+							index = i*N_Q2*N_ZH*N_PT*N_PHI+j*N_ZH*N_PT*N_PHI+k*N_PT*N_PHI+l*N_PHI+m;
+                            inRC >> Q2i >> Xbi >> Zhi >> Pti >> Phii >> sigb >> sigob >> tail1 >> tail2 >> facno >> fact;
+                            if(fact == 0){
+                                if(met == 0) rcFactorFe[index] = 1;
+                                else if(met == 1) rcFactorFe[index] = 1;
+                                else if(met == 2) rcFactorPb[index] = 1;
+                                else if(met == 3) rcFactorDC[index] = 1;
+								else if(met == 4) rcFactorDFe[index] = 1;
+								else if(met == 5) rcFactorDPb[index] = 1;
+                            }
+                            else{
+                                if(met == 0) rcFactorFe[index] = fact;
+                                else if(met == 1) rcFactorFe[index] = fact;
+                                else if(met == 2) rcFactorPb[index] = fact;
+                                else if(met == 3) rcFactorDC[index] = fact;
+								else if(met == 4) rcFactorDFe[index] = fact;
+								else if(met == 5) rcFactorDPb[index] = fact;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        inRC.close();
+    }
 }
 
 void runVar(TString depVar){
@@ -150,6 +225,8 @@ void runVar(TString depVar){
 	Int_t N_VAR;
 	Int_t N_1, N_2, N_3, N_4;
 	Int_t sys;
+	Int_t index;
+	Int_t q2i, xbi, zhi, pti, phii;
 
 	if(depVar == "Q2"){
 		N_VAR = N_Q2;
@@ -184,21 +261,23 @@ void runVar(TString depVar){
     Double_t low;
     Double_t up;
 	
-    TH1F *hf_C_cor;
-    TH1F *hf_D2C_cor;
-    TH1F *hf_Fe_cor;
-    TH1F *hf_D2Fe_cor;
-    TH1F *hf_Pb_cor;
-	TH1F *hf_D2Pb_cor;
+    TH1F *hf_C_cor, *hf_C_cor_RC;
+    TH1F *hf_D2C_cor, *hf_D2C_cor_RC; 
+    TH1F *hf_Fe_cor, *hf_Fe_cor_RC;
+    TH1F *hf_D2Fe_cor, *hf_D2Fe_cor_RC;
+    TH1F *hf_Pb_cor, *hf_Pb_cor_RC;
+	TH1F *hf_D2Pb_cor, *hf_D2Pb_cor_RC;
 
-    TH1F *h_C_l; TH1F *h_Fe_l; TH1F *h_Pb_l;
-    TH1F *h_C_s; TH1F *h_Fe_s; TH1F *h_Pb_s;
-    TH1F *h_C_acc; TH1F *h_Fe_acc; TH1F *h_Pb_acc; TH1F *h_D_acc;
-    TH1F *h_C_thr; TH1F *h_Fe_thr; TH1F *h_Pb_thr; TH1F *h_D_thr;
+    TH1F *h_C_l, *h_Fe_l, *h_Pb_l;
+    TH1F *h_C_s, *h_Fe_s, *h_Pb_s;
+    TH1F *h_C_acc, *h_Fe_acc, *h_Pb_acc, *h_D_acc;
+    TH1F *h_C_thr, *h_Fe_thr, *h_Pb_thr, *h_D_thr;
 
-    TH1F *hsC; TH1F *hsFe; TH1F *hsPb; TH1F *hsD2;
-    TH1F *hC_cor; TH1F *hFe_cor; TH1F *hPb_cor;
-    TH1F *hD2C_cor; TH1F *hD2Fe_cor; TH1F *hD2Pb_cor;
+    TH1F *hsC, *hsFe, *hsPb, *hsD2;
+    TH1F *hC_cor, *hFe_cor, *hPb_cor;
+    TH1F *hC_cor_rc, *hFe_cor_rc, *hPb_cor_rc;
+    TH1F *hD2C_cor, *hD2Fe_cor, *hD2Pb_cor;
+    TH1F *hD2C_cor_rc, *hD2Fe_cor_rc, *hD2Pb_cor_rc;
 
     Double_t number_C[N_VAR];
     Double_t number_D2C[N_VAR];
@@ -207,9 +286,9 @@ void runVar(TString depVar){
     Double_t number_Pb[N_VAR];
     Double_t number_D2Pb[N_VAR];
 
-    TH1F *hf_C;
-    TH1F *hf_Fe;
-    TH1F *hf_Pb;
+    TH1F *hf_C, *hf_C_RC;
+    TH1F *hf_Fe, *hf_Fe_RC;
+    TH1F *hf_Pb, *hf_Pb_RC;
 
     sys = system("rm -f temp_" + depVar + ".root");
 	if(sys){}
@@ -232,11 +311,17 @@ void runVar(TString depVar){
     up = axis_temp->GetBinUpEdge(nbins); 
 
     hf_C_cor = new TH1F("hf_C_cor","",nbins,low,up);  
+    hf_C_cor_RC = new TH1F("hf_C_cor_RC", "", nbins, low, up); 
     hf_D2C_cor = new TH1F("hf_D2C_cor","",nbins,low,up);
+    hf_D2C_cor_RC = new TH1F("hf_D2C_cor_RC", "", nbins, low, up); 
     hf_Fe_cor = new TH1F("hf_Fe_cor","",nbins,low,up);
+    hf_Fe_cor_RC = new TH1F("hf_Fe_cor_RC", "", nbins, low, up);    
     hf_D2Fe_cor = new TH1F("hf_D2Fe_cor","",nbins,low,up);
+    hf_D2Fe_cor_RC = new TH1F("hf_D2Fe_cor_RC", "", nbins, low, up);        
     hf_Pb_cor = new TH1F("hf_Pb_cor","",nbins,low,up);
+    hf_Pb_cor_RC = new TH1F("hf_Pb_cor_RC", "", nbins, low, up);       
     hf_D2Pb_cor = new TH1F("hf_D2Pb_cor","",nbins,low,up);
+    hf_D2Pb_cor_RC = new TH1F("hf_D2Pb_cor_RC", "", nbins, low, up);  
 
     for(Int_t j = 0; j < N_1; j++){
         for(Int_t k = 0; k < N_2; k++){            
@@ -274,44 +359,97 @@ void runVar(TString depVar){
                     //Applying acceptance correction to the temp root histogram file
                     hsC = new TH1F("hsC", "", nbins,low,up);
                     hC_cor = new TH1F("hC_cor","",nbins,low,up);
+                    hC_cor_rc = new TH1F("hC_cor_rc", "", nbins, low, up);
                     hsC->Divide(h_C_acc,h_C_thr,1,1);
                     hC_cor->Divide(h_C_s,hsC,1,1);
-
                     hf_C_cor->Add(hC_cor,1);
-                    delete hsC;
-                    delete hC_cor;
                     
                     hsFe = new TH1F("hsFe","",nbins,low,up);
                     hFe_cor = new TH1F("hFe_cor","",nbins,low,up);
+                    hFe_cor_rc = new TH1F("hFe_cor_rc", "", nbins, low, up);
                     hsFe->Divide(h_Fe_acc,h_Fe_thr,1,1);
                     hFe_cor->Divide(h_Fe_s,hsFe,1,1);
                     hf_Fe_cor->Add(hFe_cor,1);
-                    delete hsFe;
-                    delete hFe_cor;
                     
                     hsPb = new TH1F("hsPb","",nbins,low,up);
                     hPb_cor = new TH1F("hPb_cor","",nbins,low,up);
+                    hPb_cor_rc = new TH1F("hPb_cor_rc", "", nbins, low, up);
                     hsPb->Divide(h_Pb_acc,h_Pb_thr,1,1);
                     hPb_cor->Divide(h_Pb_s,hsPb,1,1);
                     hf_Pb_cor->Add(hPb_cor,1);
-                    delete hsPb;
-                    delete hPb_cor;
                     
                     hsD2 = new TH1F("hsD2","",nbins,low,up);
                     hD2C_cor = new TH1F("hD2C_cor","",nbins,low,up);
                     hD2Fe_cor = new TH1F("hD2Fe_cor","",nbins,low,up);
                     hD2Pb_cor = new TH1F("hD2Pb_cor","",nbins,low,up);
+					hD2C_cor_rc = new TH1F("hD2C_cor_rc", "", nbins, low, up);
+                    hD2Fe_cor_rc = new TH1F("hD2Fe_cor_rc", "", nbins, low, up);
+                    hD2Pb_cor_rc = new TH1F("hD2Pb_cor_rc", "", nbins, low, up);                    
                     hsD2->Divide(h_D_acc,h_D_thr,1,1);
                     hD2C_cor->Divide(h_C_l,hsD2,1,1);
                     hD2Fe_cor->Divide(h_Fe_l,hsD2,1,1);
                     hD2Pb_cor->Divide(h_Pb_l,hsD2,1,1);
                     hf_D2C_cor->Add(hD2C_cor,1);
                     hf_D2Fe_cor->Add(hD2Fe_cor,1);
-                    hf_D2Pb_cor->Add(hD2Pb_cor,1);
+                    hf_D2Pb_cor->Add(hD2Pb_cor,1);                    
+
+					if(RCOn){
+		                for(Int_t i = 0; i < N_VAR; i++){
+							if(depVar == "Q2"){
+								q2i = i; xbi = j; zhi = k; pti = l; phii = m;
+							}
+							else if(depVar == "Xb"){
+								xbi = i; q2i = j; zhi = k; pti = l; phii = m;
+							}
+							else if(depVar == "Zh"){
+								zhi = i; q2i = j; xbi = k; pti = l; phii = m;
+							}
+							else if(depVar == "Pt"){
+								pti = i; q2i = j; xbi = k; zhi = l; phii = m;
+							}
+							else{
+								std::cout << "Bad value of depVar" << std::endl;
+								return;
+							}
+							index = xbi*N_Q2*N_ZH*N_PT*N_PHI+q2i*N_ZH*N_PT*N_PHI+zhi*N_PT*N_PHI+pti*N_PHI+phii;
+		                    hC_cor_rc->SetBinContent(i+1, hC_cor->GetBinContent(i+1)*rcFactorC[index]);
+		                    hC_cor_rc->SetBinError(i+1, hC_cor->GetBinError(i+1));
+		                    hFe_cor_rc->SetBinContent(i+1, hFe_cor->GetBinContent(i+1)*rcFactorFe[index]);
+	                        hFe_cor_rc->SetBinError(i+1, hFe_cor->GetBinError(i+1));
+		                    hPb_cor_rc->SetBinContent(i+1, hPb_cor->GetBinContent(i+1)*rcFactorPb[index]);
+		                    hPb_cor_rc->SetBinError(i+1, hPb_cor->GetBinError(i+1));
+		                    hD2C_cor_rc->SetBinContent(i+1, hD2C_cor->GetBinContent(i+1)*rcFactorDC[index]);
+		                    hD2Fe_cor_rc->SetBinContent(i+1, hD2Fe_cor->GetBinContent(i+1)*rcFactorDFe[index]);
+		                    hD2Pb_cor_rc->SetBinContent(i+1, hD2Pb_cor->GetBinContent(i+1)*rcFactorDPb[index]);
+		                    hD2C_cor_rc->SetBinError(i+1, hD2C_cor->GetBinError(i+1));
+		                    hD2Fe_cor_rc->SetBinError(i+1, hD2Fe_cor->GetBinError(i+1));
+		                    hD2Pb_cor_rc->SetBinError(i+1, hD2Pb_cor->GetBinError(i+1));
+		                }
+					}
+					
+                    hf_C_cor_RC->Add(hC_cor_rc,1);					
+                    hf_Fe_cor_RC->Add(hFe_cor_rc,1);					
+                    hf_Pb_cor_RC->Add(hPb_cor_rc,1);					
+                    hf_D2C_cor_RC->Add(hD2C_cor_rc,1);
+                    hf_D2Fe_cor_RC->Add(hD2Fe_cor_rc,1);
+                    hf_D2Pb_cor_RC->Add(hD2Pb_cor_rc,1);					
+					
+					delete hsC;
+					delete hC_cor;
+					delete hC_cor_rc;
+                    delete hsFe;
+                    delete hFe_cor;
+                    delete hFe_cor_rc;
+                    delete hsPb;
+                    delete hPb_cor;
+                    delete hPb_cor_rc;
                     delete hsD2;
                     delete hD2C_cor;
                     delete hD2Fe_cor;
                     delete hD2Pb_cor;
+                    delete hD2C_cor_rc;      
+                    delete hD2Fe_cor_rc;        
+                    delete hD2Pb_cor_rc;                      
                 }
             }
         }
@@ -383,17 +521,29 @@ void runVar(TString depVar){
     hf_C = new TH1F("hf_C", "", nbins, low, up);
     hf_C->Divide(hf_C_cor, hf_D2C_cor, 1, 1);
     delete hf_C_cor;
-    delete hf_D2C_cor;    
-        
+    delete hf_D2C_cor;
+    hf_C_RC = new TH1F("hf_C_RC", "", nbins, low, up);
+    hf_C_RC->Divide(hf_C_cor_RC, hf_D2C_cor_RC, 1, 1); 
+    delete hf_C_cor_RC;
+    delete hf_D2C_cor_RC;
+    
     hf_Fe = new TH1F("hf_Fe", "", nbins, low, up);
     hf_Fe->Divide(hf_Fe_cor, hf_D2Fe_cor, 1, 1);
     delete hf_Fe_cor;
     delete hf_D2Fe_cor;
+    hf_Fe_RC = new TH1F("hf_Fe_RC", "", nbins, low, up);
+    hf_Fe_RC->Divide(hf_Fe_cor_RC, hf_D2Fe_cor_RC, 1, 1);
+    delete hf_Fe_cor_RC;
+    delete hf_D2Fe_cor_RC;        
         
     hf_Pb = new TH1F("hf_Pb", "", nbins, low, up);
     hf_Pb->Divide(hf_Pb_cor, hf_D2Pb_cor, 1, 1);
     delete hf_Pb_cor;
     delete hf_D2Pb_cor;
+    hf_Pb_RC = new TH1F("hf_Pb_RC", "", nbins, low, up);
+    hf_Pb_RC->Divide(hf_Pb_cor_RC, hf_D2Pb_cor_RC, 1, 1);    
+    delete hf_Pb_cor_RC;
+    delete hf_D2Pb_cor_RC;    
 
 	if(depVar == "Xb" || depVar == "Q2"){
 		for(Int_t i = 0; i < N_VAR; i++){
@@ -406,18 +556,27 @@ void runVar(TString depVar){
     TString name_C = Form("C_hist");
     TString name_Fe = Form("Fe_hist");
     TString name_Pb = Form("Pb_hist");
+    TString name_C_rc = Form("C_rc_hist");
+    TString name_Fe_rc = Form("Fe_rc_hist");
+    TString name_Pb_rc = Form("Pb_rc_hist");    
     
     TFile *fRatio = new TFile("ratio_" + depVar + ".root","UPDATE"); 
     fRatio->cd();
     hf_C->Write(name_C);
     hf_Fe->Write(name_Fe);
     hf_Pb->Write(name_Pb);
+    hf_C_RC->Write(name_C_rc);
+    hf_Fe_RC->Write(name_Fe_rc);
+    hf_Pb_RC->Write(name_Pb_rc);       
+	hf_C->Delete();
+	hf_Fe->Delete();
+	hf_Pb->Delete();
+	hf_C_RC->Delete();
+	hf_Fe_RC->Delete();
+	hf_Pb_RC->Delete();
     fRatio->Close();  
     
     delete fRatio;
-    delete hf_C;
-    delete hf_Fe;
-    delete hf_Pb;
     fTemp->Close();
     delete fTemp;
     sys = system("rm -f temp_" + depVar +".root");

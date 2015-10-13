@@ -2,7 +2,7 @@
 
 All the steps to make Pi Plus Analysis (Multilpicity Ratio and Braodening) are detailed here.
 
-This package include ClasTool Library, HAPRAD (RCFactor) and the scripts to calculate MRatio and Broadening.
+This package include ClasTool Library, HAPRAD (RCFactor) and the scripts to calculate MRatio and Broadening.  
 To compile the library please make sure you have installed make and imake (xutils-dev in Ubuntu)
 
 First it is necessary to set the enviorment variables

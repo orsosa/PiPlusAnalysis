@@ -8,7 +8,10 @@
 #include "TF1.h"
 #include "TCanvas.h"
 
-const Int_t N_METAL = 6;
+Double_t PHI_MIN;
+Double_t PHI_MAX;
+Int_t N_PHI;
+Int_t N_METAL = 6;
 
 int main(int argc, char **argv)
 {
@@ -21,10 +24,16 @@ int main(int argc, char **argv)
 	TString Metal;
 	TString dataLoc;
 	
-	if(argc == 2)
+	if(argc == 6){
 		dataLoc = argv[1];
-	else
-		dataLoc = "";
+		PHI_MIN = (Double_t) std::stod(argv[2]);
+		PHI_MAX = (Double_t) std::stod(argv[3]);
+		N_PHI = (Int_t) std::stoi(argv[4]);
+		Metal = argv[5];
+	}
+	else{
+		std::cout << "The number of arguments is incorrect"<< std::endl;
+	}
 	
 	Float_t Q2, Xb, Zh, Pt, Phi, Val, Err;
 	Float_t A, Ac, Acc;
@@ -33,14 +42,17 @@ int main(int argc, char **argv)
 
 	Int_t nentries, empty;
 
+	if(Metal != "All") N_METAL = 1;
+	
 	for(Int_t met = 0; met < N_METAL; met++){
-		if(met == 0) Metal = "C";
-		else if(met == 1) Metal = "Fe";
-		else if(met == 2) Metal = "Pb";
-		else if(met == 3) Metal = "D_C";
-		else if(met == 4) Metal = "D_Fe";
-		else if(met == 5) Metal = "D_Pb";
-		
+		if(Metal != "All"){
+			if(met == 0) Metal = "C";
+			else if(met == 1) Metal = "Fe";
+			else if(met == 2) Metal = "Pb";
+			else if(met == 3) Metal = "D_C";
+			else if(met == 4) Metal = "D_Fe";
+			else if(met == 5) Metal = "D_Pb";
+		}
 		if(dataLoc == "")
 			f = new TFile("../Gen5DimData/" + Metal + "_5_dim_dist.root", "READ");
 		else

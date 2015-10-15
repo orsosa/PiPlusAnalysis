@@ -1,0 +1,10 @@
+./phihist /data/Loc/ PHI_MIN PHI_MAX N_PHI Metal
+
+# Metal can be
+# C
+# Fe
+# Pb
+# D_C
+# D_Fe
+# D_Pb
+# All

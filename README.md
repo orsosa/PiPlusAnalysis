@@ -14,6 +14,8 @@ setenv CLAS_LIB CLAS_LIBDirectory
 setenv ANALYSER ANALYSERDirectory/analysis_lib  
 setenv MYSQL_INCLUDE $MYSQLINC  
 setenv MYSQL_LIB $MYSQLIB  
+setenv LD_LIBRARY_PATH ${CLASTOOL}/slib/${OS_NAME}:${LD_LIBRARY_PATH}  
+setenv LD_LIBRARY_PATH ${ANALYSER}/slib:$${LD_LIBRARY_PATH}  
 
 To compile HAPRAD_CPP it is necessary to have libMathMore in root, to do this libgsl need to be installed and
 in configure set --enable-gsl-shared

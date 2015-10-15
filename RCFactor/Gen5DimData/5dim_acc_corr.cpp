@@ -91,6 +91,21 @@ int main(int argc, char **argv)
 	pionExt = (TString) argv[24];
 
 	if(argc == 26) XF_POS = (Int_t) std::stoi(argv[25]);
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << "Data Files Extension = " << fDataExt << std::endl;
+	std::cout << "Simul Files Extension = " << fSimuExt << std::endl;
+	std::cout << "Number of Simu Files = " << nSimuFiles << std::endl;
+	std::cout << "Electron Files Extension = " << elecExt << std::endl;
+	std::cout << "Pion Files Extension = " << pionExt << std::endl;
+	std::cout << std::endl;
+	if(XF_POS == 1)
+		std::cout << "Xf Cut = Xf > 0" << std::endl;
+	else if(XF_POS == -1)
+		std::cout << "Xf Cut = Xf < 0" << std::endl;
+	else
+		std::cout << "No Xf Cut" << std::endl; 
 
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;

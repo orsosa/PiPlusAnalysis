@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	if(Metal != "All") N_METAL = 1;
 	
 	for(Int_t met = 0; met < N_METAL; met++){
-		if(Metal != "All"){
+		if(Metal == "All"){
 			if(met == 0) Metal = "C";
 			else if(met == 1) Metal = "Fe";
 			else if(met == 2) Metal = "Pb";
@@ -103,6 +103,8 @@ int main(int argc, char **argv)
 			}
 			h1->Delete();
 		}
+		
+		Metal = "All";
 		
 		delete ntuple;
 		

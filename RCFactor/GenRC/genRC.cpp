@@ -14,8 +14,6 @@ Double_t Q2_MIN;
 Double_t Q2_MAX;
 Double_t XB_MIN;
 Double_t XB_MAX;
-Double_t NU_MIN;
-Double_t NU_MAX;
 Double_t ZH_MIN;
 Double_t ZH_MAX;
 Double_t PT_MIN;
@@ -25,7 +23,6 @@ Double_t PHI_MAX;
 
 Int_t N_Q2;
 Int_t N_XB;
-Int_t N_NU;
 Int_t N_ZH;
 Int_t N_PT;
 Int_t N_PHI;
@@ -46,11 +43,10 @@ int main(int argc, char **argv)
 	Double_t xbmas, q2mas, zhmas, ptmas, phimas;
 	Double_t m = TMath::Power((kMassNeutron + kMassPion), 2);
 	Double_t ebeam = 5.015;
+	Double_t a1, a2, a3;
 	Int_t sysReturn;
 
 	TRadCor rc;
-
-	TString Metal;
 
 	std::ofstream out;
 
@@ -73,12 +69,24 @@ int main(int argc, char **argv)
 	dataLoc = argv[16];	
 	Metal = argv[17];
 	
+	a1 = 1;
+	a2 = 0;
+	a3 = a1/a2;
+	
 	sysReturn = system("cp " + dataLoc + Metal + "newphihist.root .");
 	if(sysReturn == 256){
 		std::cout << "File " << dataLoc << Metal  << " not found" << std::endl;
 		return 0;
 	}
 	sysReturn = system("mv " + Metal + "newphihist.root newphihist.root");
+	
+	if(Metal == "C") NAZ = 0.5;
+	else if(Metal == "Fe") NAZ = 0.5;
+	else if(Metal == "Pb") NAZ = 82./208.;
+	else if(Metal == "D_C") NAZ = 0.5;
+	else if(Metal == "D_Fe") NAZ = 0.5;
+	else if(Metal == "D_Pb") NAZ = 0.5;
+	else NAZ = 0.5;
 	
 	out.open("RCFactor" + Metal + ".txt");
 	out << "Q2\tXb\tZh\tPt\tPhi\tSigmaB\tSigmaOb\tTail1\tTaile2\tFact_noex\tFact_ex" << std::endl;
@@ -95,7 +103,8 @@ int main(int argc, char **argv)
 						rc.CalculateRCFactor(ebeam, xbmas, q2mas, zhmas, ptmas, phimas, m, NAZ);
 						f1 = rc.GetFactor1();
 						f3 = rc.GetFactor3();
-						
+						if(TMath::IsNaN(f1) || f1 == a3) f1 = 0;
+						if(TMath::IsNaN(f3) || f3 == a3) f3 = 0;
 						out << q2_i << "\t" << xb_i << "\t" << zh_i << "\t" << pt_i << "\t" << phi_i;
 						out << "\t0\t0\t0";
 						out << "\t0\t" << f1 << "\t" << f3 << std::endl;

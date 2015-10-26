@@ -182,9 +182,9 @@ void RCFactors(){
         if(met == 0) Metal = "C";
         else if(met == 1) Metal = "Fe";
         else if(met == 2) Metal = "Pb";
-        else if(met == 3) Metal = "DC";
-		else if(met == 4) Metal = "DFe";
-		else if(met == 5) Metal = "DPb";
+        else if(met == 3) Metal = "D_C";
+		else if(met == 4) Metal = "D_Fe";
+		else if(met == 5) Metal = "D_Pb";
         inRC.open("RCFactor" + Metal + ".txt");
         if(inRC.is_open() == 0){
             std::cout << "File RCFactor" << Metal << ".txt not found " << std::endl;

@@ -47,7 +47,7 @@ Double_t delta_ZH;
 Double_t delta_PT;
 Double_t delta_PHI;
 
-const Int_t N_METAL = 6;
+Int_t N_METAL = 6;
 
 TFile *plots;
 TNtuple *fit_data;
@@ -58,8 +58,9 @@ int main(int argc, char **argv)
 {
 	TString Metal;
 	TString rootFName;
+	Int_t dataSL;
 
-	if(argc < 25){
+	if(argc < 25 || argc > 28){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 		return 0;
 	}
@@ -90,9 +91,21 @@ int main(int argc, char **argv)
 	elecExt = (TString) argv[23];
 	pionExt = (TString) argv[24];
 
-	if(argc == 26) XF_POS = (Int_t) std::stoi(argv[25]);
+	if(argc >= 26) XF_POS = (Int_t) std::stoi(argv[25]);
+	if(argc >= 27) Metal = argv[26];
+	
+	dataSL = dataLoc.Length();
+	if(dataLoc(dataSL-1, 1) != "/"){
+		dataLoc = dataLoc + "/";
+	}
 	
 	std::cout << "The following settings are being used" << std::endl;
+	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
+	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
+	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
+	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_XB << std::endl;	
+	std::cout << std::endl;
 	std::cout << "Data Directory = " << dataLoc << std::endl;
 	std::cout << "Data Files Extension = " << fDataExt << std::endl;
 	std::cout << "Simul Files Extension = " << fSimuExt << std::endl;
@@ -100,12 +113,10 @@ int main(int argc, char **argv)
 	std::cout << "Electron Files Extension = " << elecExt << std::endl;
 	std::cout << "Pion Files Extension = " << pionExt << std::endl;
 	std::cout << std::endl;
-	if(XF_POS == 1)
-		std::cout << "Xf Cut = Xf > 0" << std::endl;
-	else if(XF_POS == -1)
-		std::cout << "Xf Cut = Xf < 0" << std::endl;
-	else
-		std::cout << "No Xf Cut" << std::endl; 
+	if(XF_POS == 1) std::cout << "Xf Cut = Xf > 0" << std::endl;
+	else if(XF_POS == -1) std::cout << "Xf Cut = Xf < 0" << std::endl;
+	else std::cout << "No Xf Cut" << std::endl; 
+	if(argc == 27) std::cout << "Running only for Metal " << Metal << std::endl;
 
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;
@@ -113,14 +124,18 @@ int main(int argc, char **argv)
 	delta_PT = (PT_MAX-PT_MIN)/N_PT;
 	delta_PHI = (PHI_MAX-PHI_MIN)/N_PHI;
 	delta_NU = (NU_MAX-NU_MIN)/N_NU;
+	
+	if(Metal != "") N_METAL = 1;
 
 	for(Int_t met = 0; met < N_METAL; met++){
-		if(met == 0) Metal = "C";
-		else if(met == 1) Metal = "Fe";
-		else if(met == 2) Metal = "Pb";
-		else if(met == 3) Metal = "D_C";
-		else if(met == 4) Metal = "D_Fe";
-		else if(met == 5) Metal = "D_Pb";
+		if(N_METAL == 6){
+			if(met == 0) Metal = "C";
+			else if(met == 1) Metal = "Fe";
+			else if(met == 2) Metal = "Pb";
+			else if(met == 3) Metal = "D_C";
+			else if(met == 4) Metal = "D_Fe";
+			else if(met == 5) Metal = "D_Pb";
+		}
 		rootFName = Metal + "_5_dim_dist.root";
 		plots = new TFile(rootFName, "RECREATE");
 		fit_data = new TNtuple("fit_data", "DATA FOR 5 DIM FIT", "Q2:Xb:Zh:Pt:Phi:Val:Err");
@@ -176,10 +191,10 @@ void run_file(TString Metal, Double_t q2_min, Double_t q2_max, Double_t xb_min, 
 		fntuple->Add(dataLoc + Metal + fDataExt + pionExt);
 		faccept = new TChain("accept_pion");
 		for(Int_t q = 0; q < nSimuFiles; q++)
-			faccept->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);
+			faccept->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
 		fthrown = new TChain("thrown_pion");
 		for(Int_t q = 0; q < nSimuFiles; q++)
-			fthrown->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);		
+			fthrown->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);		
 	}
 	else{
 		MetalD = Metal(2,2);
@@ -187,10 +202,10 @@ void run_file(TString Metal, Double_t q2_min, Double_t q2_max, Double_t xb_min, 
 		fntuple->Add(dataLoc + MetalD + fDataExt + pionExt);
 		faccept = new TChain("accept_pion");
 		for(Int_t q = 0; q < nSimuFiles; q++)
-			faccept->Add(dataLoc + Metal(0,1) + std::to_string(q+1) + fSimuExt + pionExt);
+			faccept->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
 		fthrown = new TChain("thrown_pion");
 		for(Int_t q = 0; q < nSimuFiles; q++)
-			fthrown->Add(dataLoc + Metal(0,1) + std::to_string(q+1) + fSimuExt + pionExt);
+			fthrown->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
 	}	
 	
     fntuple->Draw(">>list", cuts, "goff");

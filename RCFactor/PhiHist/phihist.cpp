@@ -11,7 +11,8 @@
 Double_t PHI_MIN;
 Double_t PHI_MAX;
 Int_t N_PHI;
-Int_t N_METAL = 6;
+Int_t N_METAL;
+const Int_t MIN_BIN = 4;
 
 int main(int argc, char **argv)
 {
@@ -23,17 +24,29 @@ int main(int argc, char **argv)
 	TF1 *func;
 	TString Metal;
 	TString dataLoc;
+	Int_t dataSL;
 	
-	if(argc == 6){
-		dataLoc = argv[1];
-		PHI_MIN = (Double_t) std::stod(argv[2]);
-		PHI_MAX = (Double_t) std::stod(argv[3]);
-		N_PHI = (Int_t) std::stoi(argv[4]);
-		Metal = argv[5];
+	if(argc < 5 || argc > 6){
+		std::cout << "The number of arguments is incorrect" << std::endl;
+		return 0;
 	}
-	else{
-		std::cout << "The number of arguments is incorrect"<< std::endl;
-	}
+	
+	dataLoc = argv[1];
+	PHI_MIN = (Double_t) std::stod(argv[2]);
+	PHI_MAX = (Double_t) std::stod(argv[3]);
+	N_PHI = (Int_t) std::stoi(argv[4]);
+	if(argc >= 6) Metal = argv[5];
+		
+	dataSL = dataLoc.Length();
+	if(dataLoc(dataSL-1, 1) != "/"){
+		dataLoc = dataLoc + "/";
+	}	
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << PHI_MIN << " < PHI < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;
+	if(argc == 6) std::cout << "Running only for Metal "<< Metal << std::endl;
+	else std::cout << "Running all Metals" << std::endl;	
 	
 	Float_t Q2, Xb, Zh, Pt, Phi, Val, Err;
 	Float_t A, Ac, Acc;
@@ -42,10 +55,11 @@ int main(int argc, char **argv)
 
 	Int_t nentries, empty;
 
-	if(Metal != "All") N_METAL = 1;
+	if(Metal == "") N_METAL = 6;
+	else N_METAL = 1;
 	
 	for(Int_t met = 0; met < N_METAL; met++){
-		if(Metal == "All"){
+		if(Metal == ""){
 			if(met == 0) Metal = "C";
 			else if(met == 1) Metal = "Fe";
 			else if(met == 2) Metal = "Pb";
@@ -87,7 +101,7 @@ int main(int argc, char **argv)
 					empty++;
 				h1->SetBinError(j, Err*1.04);
 			}
-			if(empty < N_PHI){
+			if(empty <= (N_PHI - MIN_BIN)){
 				h1->Fit(func, "q");
 				h1->Write();
 				if(func->GetNDF() != 0){
@@ -104,7 +118,7 @@ int main(int argc, char **argv)
 			h1->Delete();
 		}
 		
-		Metal = "All";
+		Metal = "";
 		
 		delete ntuple;
 		

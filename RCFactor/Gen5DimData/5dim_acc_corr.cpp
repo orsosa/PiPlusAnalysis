@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
 	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
 	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
-	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_XB << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;	
 	std::cout << std::endl;
 	std::cout << "Data Directory = " << dataLoc << std::endl;
 	std::cout << "Data Files Extension = " << fDataExt << std::endl;

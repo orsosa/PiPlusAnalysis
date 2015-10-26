@@ -42,9 +42,9 @@ int main(int argc, char **argv)
 	Double_t NAZ;
 	Double_t xbmas, q2mas, zhmas, ptmas, phimas;
 	Double_t m = TMath::Power((kMassNeutron + kMassPion), 2);
-	Double_t ebeam = 5.015;
 	Double_t a1, a2, a3;
 	Int_t sysReturn;
+	Int_t dataSL;
 
 	TRadCor rc;
 
@@ -69,9 +69,30 @@ int main(int argc, char **argv)
 	dataLoc = argv[16];	
 	Metal = argv[17];
 	
+	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
+	delta_XB = (XB_MAX-XB_MIN)/N_XB;
+	delta_ZH = (ZH_MAX-ZH_MIN)/N_ZH;
+	delta_PT = (PT_MAX-PT_MIN)/N_PT;
+	delta_PHI = (PHI_MAX-PHI_MIN)/N_PHI;
+	
+	dataSL = dataLoc.Length();
+	if(dataLoc(dataSL-1, 1) != "/"){
+		dataLoc = dataLoc + "/";
+	}	
+	
 	a1 = 1;
 	a2 = 0;
 	a3 = a1/a2;
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
+	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
+	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
+	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;	
+	std::cout << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << "Running only Metal " << Metal << std::endl;
 	
 	sysReturn = system("cp " + dataLoc + Metal + "newphihist.root .");
 	if(sysReturn == 256){
@@ -100,7 +121,7 @@ int main(int argc, char **argv)
 					ptmas = PT_MIN + (pt_i - 0.5)*delta_PT;
 					for(Int_t phi_i = 1; phi_i <= N_PHI; phi_i++){
 						phimas = PHI_MIN + (phi_i - 0.5)*delta_PHI;
-						rc.CalculateRCFactor(ebeam, xbmas, q2mas, zhmas, ptmas, phimas, m, NAZ);
+						rc.CalculateRCFactor(5.015, xbmas, q2mas, zhmas, ptmas, phimas, m, NAZ);
 						f1 = rc.GetFactor1();
 						f3 = rc.GetFactor3();
 						if(TMath::IsNaN(f1) || f1 == a3) f1 = 0;

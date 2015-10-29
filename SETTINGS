@@ -31,7 +31,7 @@ NU_BIN=0
 
 [RCFactor]
 RCFactorON=1
-RecreateRC=0
+RecreateRC=1
 RCDir=/home/rodrigo/github/PiPlusAnalysis/RCFactor/
 
 [MRatio]

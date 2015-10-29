@@ -2,16 +2,16 @@
 
 All the steps to make Pi Plus Analysis (Multilpicity Ratio and Braodening) are detailed here.
 
-To compile the library please make sure you have installed make and imake (xutils-dev in Ubuntu), cernlib and ROOT
+To compile the library please make sure you have installed make, imake (xutils-dev in Ubuntu), cernlib and ROOT
 
 First it is necessary to set the enviorment variables
 
 setenv GITPIPLUS PiPlusDirectory  
-setenv CLASTOOL ClasToolDirectory  
+setenv CLASTOOL ${GITPIPLUS}/ClasToolPack/ClasTool  
 setenv OS_NAME Linux  
-setenv CLAS_PACK CLAS_PACKDirectory  
-setenv CLAS_LIB CLAS_LIBDirectory  
-setenv ANALYSER ANALYSERDirectory/analysis_lib  
+setenv CLAS_PACK ${GITPIPLUS}/ClasToolPack/CLAS_PACK  
+setenv CLAS_LIB ${GITPIPLUS}/ClasToolPack/CLAS_LIB  
+setenv ANALYSER ${GITPIPLUS}/ClasToolPack/Analyser/analysis_lib  
 setenv MYSQL_INCLUDE $MYSQLINC  
 setenv MYSQL_LIB $MYSQLIB  
 setenv LD_LIBRARY_PATH ${CLASTOOL}/slib/${OS_NAME}:${LD_LIBRARY_PATH}  

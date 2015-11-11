@@ -172,59 +172,6 @@ int main(int argc, char **argv){
 	runVar(depVar);
 }
 
-void RCFactors(){
-    TString Metal, Aux;
-    ifstream inRC;
-	Int_t index;
-    Int_t Q2i, Xbi, Zhi, Pti, Phii;
-    Float_t sigb, sigob, tail1, tail2, facno, fact; 
-    for(Int_t met = 0; met < 6; met++){
-        if(met == 0) Metal = "C";
-        else if(met == 1) Metal = "Fe";
-        else if(met == 2) Metal = "Pb";
-        else if(met == 3) Metal = "D_C";
-		else if(met == 4) Metal = "D_Fe";
-		else if(met == 5) Metal = "D_Pb";
-        inRC.open("RCFactor" + Metal + ".txt");
-        if(inRC.is_open() == 0){
-            std::cout << "File RCFactor" << Metal << ".txt not found " << std::endl;
-            return;
-        }        
-        for(Int_t i = 0; i < 11; i++){
-            inRC >> Aux;
-        }
-        for(Int_t i = 0; i < N_XB; i++){
-            for(Int_t j = 0; j < N_Q2; j++){
-                for(Int_t k = 0; k < N_ZH; k++){
-                    for(Int_t l = 0; l < N_PT; l++){
-                        for(Int_t m = 0; m < N_PHI; m++){
-							index = i*N_Q2*N_ZH*N_PT*N_PHI+j*N_ZH*N_PT*N_PHI+k*N_PT*N_PHI+l*N_PHI+m;
-                            inRC >> Q2i >> Xbi >> Zhi >> Pti >> Phii >> sigb >> sigob >> tail1 >> tail2 >> facno >> fact;
-                            if(fact == 0){
-                                if(met == 0) rcFactorFe[index] = 1;
-                                else if(met == 1) rcFactorFe[index] = 1;
-                                else if(met == 2) rcFactorPb[index] = 1;
-                                else if(met == 3) rcFactorDC[index] = 1;
-								else if(met == 4) rcFactorDFe[index] = 1;
-								else if(met == 5) rcFactorDPb[index] = 1;
-                            }
-                            else{
-                                if(met == 0) rcFactorFe[index] = fact;
-                                else if(met == 1) rcFactorFe[index] = fact;
-                                else if(met == 2) rcFactorPb[index] = fact;
-                                else if(met == 3) rcFactorDC[index] = fact;
-								else if(met == 4) rcFactorDFe[index] = fact;
-								else if(met == 5) rcFactorDPb[index] = fact;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        inRC.close();
-    }
-}
-
 void runVar(TString depVar){
 	TString var1, var2, var3, var4;
 	Int_t N_VAR;
@@ -595,6 +542,10 @@ void runDataVar(TString depVar, TString Metal){
     TCut cuts;
 	TCut depVarcut;
 	TCut var1cut, var2cut, var3cut, var4cut;
+	TCut Xf_cut;
+	if(XF_POS == 1) Xf_cut = Form("Xf>0")
+	else if(XF_POS == -1) Xf_cut = Form("Xf<0");
+	else Xf_cut = Form("Xf<0 || Xf>0");
 
 	TString var1, var2, var3, var4;
 	Int_t N_VAR;
@@ -644,7 +595,7 @@ void runDataVar(TString depVar, TString Metal){
     
     TFile *fPion = new TFile(dataLoc + Metal + fDataExt + pionExt);
     TNtuple *ntuplePion = (TNtuple*) fPion->Get("data_pion");
-    ntuplePion->Draw(">>list", depVarcut, "goff");
+    ntuplePion->Draw(">>list", depVarcut && Xf_cut, "goff");
     ntuplePion->SetEventList((TEventList*)gDirectory->Get("list"));
 
     for(Int_t j = 0; j < N_1; j++){
@@ -692,6 +643,10 @@ void runSimulVar(TString depVar, TString Metal){
     TCut cuts;
 	TCut depVarcut;
 	TCut var1cut, var2cut, var3cut, var4cut;
+	TCut Xf_cut;
+	if(XF_POS == 1) Xf_cut = Form("Xf>0")
+	else if(XF_POS == -1) Xf_cut = Form("Xf<0");
+	else Xf_cut = Form("Xf<0 || Xf>0");	
 
 	TString var1, var2, var3, var4;
 	Int_t N_VAR;
@@ -746,7 +701,7 @@ void runSimulVar(TString depVar, TString Metal){
 		accept->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);
     nentries = accept->GetEntries();
     accept->SetEstimate(nentries);
-    accept->Draw(">>list_accept", depVarcut, "goff");
+    accept->Draw(">>list_accept", depVarcut && Xf_cut, "goff");
     accept->SetEventList((TEventList*) gDirectory->Get("list_accept"));
 
     TChain *thrown = new TChain("thrown_pion");
@@ -754,7 +709,7 @@ void runSimulVar(TString depVar, TString Metal){
 		thrown->Add(dataLoc + Metal + std::to_string(q+1) + fSimuExt + pionExt);
     nentries = thrown->GetEntries();
     thrown->SetEstimate(nentries);
-    thrown->Draw(">>list_thrown", depVarcut, "goff");
+    thrown->Draw(">>list_thrown", depVarcut && Xf_cut, "goff");
     thrown->SetEventList((TEventList*) gDirectory->Get("list_thrown"));
     
     for(Int_t j = 0; j < N_1; j++){
@@ -847,4 +802,57 @@ void GetNel(TString Metal, Double_t Xb_min, Double_t Xb_max, Double_t Q2_min, Do
 
     delete elAccept;
     delete elThrown;   
+}
+
+void RCFactors(){
+    TString Metal, Aux;
+    ifstream inRC;
+	Int_t index;
+    Int_t Q2i, Xbi, Zhi, Pti, Phii;
+    Float_t sigb, sigob, tail1, tail2, facno, fact; 
+    for(Int_t met = 0; met < 6; met++){
+        if(met == 0) Metal = "C";
+        else if(met == 1) Metal = "Fe";
+        else if(met == 2) Metal = "Pb";
+        else if(met == 3) Metal = "D_C";
+		else if(met == 4) Metal = "D_Fe";
+		else if(met == 5) Metal = "D_Pb";
+        inRC.open("RCFactor" + Metal + ".txt");
+        if(inRC.is_open() == 0){
+            std::cout << "File RCFactor" << Metal << ".txt not found " << std::endl;
+            return;
+        }        
+        for(Int_t i = 0; i < 11; i++){
+            inRC >> Aux;
+        }
+        for(Int_t i = 0; i < N_XB; i++){
+            for(Int_t j = 0; j < N_Q2; j++){
+                for(Int_t k = 0; k < N_ZH; k++){
+                    for(Int_t l = 0; l < N_PT; l++){
+                        for(Int_t m = 0; m < N_PHI; m++){
+							index = i*N_Q2*N_ZH*N_PT*N_PHI+j*N_ZH*N_PT*N_PHI+k*N_PT*N_PHI+l*N_PHI+m;
+                            inRC >> Q2i >> Xbi >> Zhi >> Pti >> Phii >> sigb >> sigob >> tail1 >> tail2 >> facno >> fact;
+                            if(fact == 0){
+                                if(met == 0) rcFactorFe[index] = 1;
+                                else if(met == 1) rcFactorFe[index] = 1;
+                                else if(met == 2) rcFactorPb[index] = 1;
+                                else if(met == 3) rcFactorDC[index] = 1;
+								else if(met == 4) rcFactorDFe[index] = 1;
+								else if(met == 5) rcFactorDPb[index] = 1;
+                            }
+                            else{
+                                if(met == 0) rcFactorFe[index] = fact;
+                                else if(met == 1) rcFactorFe[index] = fact;
+                                else if(met == 2) rcFactorPb[index] = fact;
+                                else if(met == 3) rcFactorDC[index] = fact;
+								else if(met == 4) rcFactorDFe[index] = fact;
+								else if(met == 5) rcFactorDPb[index] = fact;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        inRC.close();
+    }
 }

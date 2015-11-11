@@ -170,6 +170,20 @@ int main(int argc, char **argv){
 	}
 
 	runVar(depVar);
+	
+	delete v_Q2;
+	delete v_NU;
+	delete v_ZH;
+	delete v_XB;
+	delete v_PT;
+	delete v_PHI;
+	
+	delete rcFactorC;
+	delete rcFactorFe;
+	delete rcFactorPb;
+	delete rcFactorDC;
+	delete rcFactorDFe;
+	delete rcFactorDPb;
 }
 
 void runVar(TString depVar){
@@ -543,7 +557,7 @@ void runDataVar(TString depVar, TString Metal){
 	TCut depVarcut;
 	TCut var1cut, var2cut, var3cut, var4cut;
 	TCut Xf_cut;
-	if(XF_POS == 1) Xf_cut = Form("Xf>0")
+	if(XF_POS == 1) Xf_cut = Form("Xf>0");
 	else if(XF_POS == -1) Xf_cut = Form("Xf<0");
 	else Xf_cut = Form("Xf<0 || Xf>0");
 
@@ -644,7 +658,7 @@ void runSimulVar(TString depVar, TString Metal){
 	TCut depVarcut;
 	TCut var1cut, var2cut, var3cut, var4cut;
 	TCut Xf_cut;
-	if(XF_POS == 1) Xf_cut = Form("Xf>0")
+	if(XF_POS == 1) Xf_cut = Form("Xf>0");
 	else if(XF_POS == -1) Xf_cut = Form("Xf<0");
 	else Xf_cut = Form("Xf<0 || Xf>0");	
 
@@ -691,7 +705,6 @@ void runSimulVar(TString depVar, TString Metal){
 		std::cout << "Bad value of depVar" << std::endl;
 		return;
 	}
-
     
     TH1F *h_acc[N_1][N_2][N_3][N_4];
     TH1F *h_thr[N_1][N_2][N_3][N_4];

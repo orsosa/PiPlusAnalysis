@@ -20,7 +20,7 @@ INCLUDES  := -I/$(ROOTINCDIR)
 LIBS      := $(ROOTLIBS)
 
 ##############################################################################
-all: AcceptPt2 Pt2BroadScript
+all: AcceptPt2 Pt2Broad
 
 Pt2Broad:Pt2Broad.o
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $@

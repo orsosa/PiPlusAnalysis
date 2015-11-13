@@ -68,8 +68,6 @@ Float_t *rcFactorDC;
 Float_t *rcFactorDFe;
 Float_t *rcFactorDPb;
 
-const Double_t kMassProton = 0.938272;
-
 void RCFactors();
 
 void runVar(TString depVar);

@@ -114,6 +114,7 @@ int main(int argc, char **argv){
 	fSimuExt = (TString) argv[21];
 	elecExt = (TString) argv[22];
 	pionExt = (TString) argv[23];
+	RCOn = (Int_t) argv[24];
 	
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;

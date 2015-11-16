@@ -331,6 +331,24 @@ int main(int argc, char **argv){
 				MyC->Modified();
 				MyC->Update();
 				MyC->SaveAs(name1);	
+				
+				delete MyC;
+				delete S;
+				delete gr25;
+				delete gr25_rc;
+				delete Graph4;
+				delete tex1;
+				delete m1;
+				delete m1_rc;
+				delete m2;
+				delete m2_rc;
+				delete m3;
+				delete m3_rc;
+				delete gr1;
+				delete gr2;
+				delete gr3;
+				delete legend;
+				delete tex;				
 
 				out << pt2b_rc[0] << "\t\t" << pt2b_err_rc[0] << "\t\t" << pt2b_rc[1] << "\t\t" << pt2b_err_rc[1] << "\t\t" << pt2b_rc[2] << "\t\t" << pt2b_err_rc[2] << std::endl;
 			}	

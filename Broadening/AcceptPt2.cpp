@@ -88,6 +88,7 @@ int main(int argc, char **argv){
 	if(argc < 24){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 		std::cout << argc << std::endl;
+		return 0;
 	}
 	
 	Q2_MIN = (Double_t) std::stod(argv[1]);
@@ -232,7 +233,7 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 	
 	if(Metal(0,1) == "D"){
 		Target_cut = Form("TargType==%d", 1);
-		solidMetal = Metal(2,2);
+		solidMetal = Metal(1,2);
 		Metal = "D";
 	}
 	else{
@@ -262,6 +263,10 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 		upper_lim = -(B+1)/K;
 	} 
 	else{
+		delete fntuple;
+		delete h_data_corr;
+		delete h_data_corr_RC;
+		delete func;
 		return;
 	}
 
@@ -314,7 +319,7 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
       			htmp_data_corr_rc->SetBinContent(m, (htmp_data_corr->GetBinContent(m))*rcFactor[index]);
       			htmp_data_corr_rc->SetBinError(m, htmp_data_corr->GetBinError(m));
 			}
-			h_data_corr_RC->Add(htmp_data_corr,1);
+			h_data_corr_RC->Add(htmp_data_corr_rc,1);
 		}
 		delete htmp_acc_ratio;
 		delete htmp_data_corr;
@@ -329,6 +334,7 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 	delete fntuple;
 	delete faccept;
 	delete fthrown;
+	delete func;
 }
 
 void RCFactors(){

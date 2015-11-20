@@ -47,6 +47,8 @@ Int_t N_PT2 = 30;
 Double_t delta_PT2;
 Double_t *v_PT2;
 
+Int_t XF_POS = 0;
+
 Double_t delta_Q2;
 Double_t delta_XB;
 Double_t delta_NU;
@@ -81,13 +83,10 @@ void plots(Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, Double_t XB_MAX, D
 void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, Double_t XB_MAX, Double_t ZH_MIN, Double_t ZH_MAX);
 
 int main(int argc, char **argv){
-	for(Int_t i = 0; i < argc; i++){
-		std::cout << "Arg " << i << std::endl;
-		std::cout << argv[i] << std::endl;
-	}
+	Int_t dataSlen;
+
 	if(argc < 24){
 		std::cout << "The number of arguments is incorrect" << std::endl;
-		std::cout << argc << std::endl;
 		return 0;
 	}
 	
@@ -117,6 +116,27 @@ int main(int argc, char **argv){
 	pionExt = (TString) argv[23];
 	
 	RCOn = (Int_t) std::stoi(argv[24]);
+	XF_POS = (Int_t) std::stoi(argv[25]);
+	
+	dataSlen = dataLoc.Length();
+	if(dataLoc(dataSlen-1, 1) != "/") dataLoc = dataLoc + "/";
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
+	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
+	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
+	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;	
+	std::cout << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << "Data Files Extension = " << fDataExt << std::endl;
+	std::cout << "Simul Files Extension = " << fSimuExt << std::endl;
+	std::cout << "Electron Files Extension = " << elecExt << std::endl;
+	std::cout << "Pion Files Extension = " << pionExt << std::endl;
+	std::cout << std::endl;
+	if(XF_POS == 1) std::cout << "Xf Cut = Xf > 0" << std::endl;
+	else if(XF_POS == -1) std::cout << "Xf Cut = Xf < 0" << std::endl;
+	else std::cout << "No Xf Cut" << std::endl; 	
 	
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;
@@ -214,12 +234,20 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 
 	Int_t index;
 	TString solidMetal;
+	TString originMetal;
 	TCut Target_cut;
-	TCut Phi_cut;	
+	TCut Phi_cut;
+	TCut Xf_cut;
 	TCut Q2_cut = Form("Q2>%f && Q2<%f", Q2_MIN, Q2_MAX);
 	TCut Xb_cut = Form("Xb>%f && Xb<%f", XB_MIN, XB_MAX);
 	TCut Zh_cut = Form("Zh>%f && Zh<%f", ZH_MIN, ZH_MAX);
+	if(XF_POS == 1) Xf_cut = Form("Xf>0");
+	else if(XF_POS == -1) Xf_cut = Form("Xf<0");
+	else Xf_cut = Form("Xf<=0 || Xf>0");
+	
 	Float_t *rcFactor;
+	
+	originMetal = Metal;
 	
 	if(Metal == "C") rcFactor = rcFactorC;
 	else if(Metal == "Fe") rcFactor = rcFactorFe;
@@ -241,8 +269,8 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 		solidMetal = Metal;
 	}
 	
-	TCut cuts = Q2_cut && Xb_cut && Zh_cut && Target_cut;
-	TCut cuts_simul = Q2_cut && Xb_cut && Zh_cut;
+	TCut cuts = Q2_cut && Xb_cut && Zh_cut && Target_cut && Xf_cut;
+	TCut cuts_simul = Q2_cut && Xb_cut && Zh_cut && Xf_cut;
 	
 	TChain *fntuple, *faccept, *fthrown;	
 
@@ -325,6 +353,9 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 		delete htmp_data_corr;
 		delete htmp_data_corr_rc;		
 	}
+	
+	Metal = originMetal;
+	
 	file->cd();
 	h_data_corr->Write((const char*) Form("%s_hist_%d%d%d", (const char*)Metal, q2i, xbi, zhi));
 	if(RCOn) h_data_corr_RC->Write((const char*) Form("%s_hist_rc_%d%d%d", (const char*)Metal, q2i, xbi, zhi));	

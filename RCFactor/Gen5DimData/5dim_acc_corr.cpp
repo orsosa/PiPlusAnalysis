@@ -95,9 +95,7 @@ int main(int argc, char **argv)
 	if(argc >= 27) Metal = argv[26];
 	
 	dataSL = dataLoc.Length();
-	if(dataLoc(dataSL-1, 1) != "/"){
-		dataLoc = dataLoc + "/";
-	}
+	if(dataLoc(dataSL-1, 1) != "/") dataLoc = dataLoc + "/";
 	
 	std::cout << "The following settings are being used" << std::endl;
 	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
@@ -197,7 +195,7 @@ void run_file(TString Metal, Double_t q2_min, Double_t q2_max, Double_t xb_min, 
 			fthrown->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);		
 	}
 	else{
-		MetalD = Metal(2,2);
+		MetalD = Metal(1,2);
 		fntuple = new TChain("data_pion");
 		fntuple->Add(dataLoc + MetalD + fDataExt + pionExt);
 		faccept = new TChain("accept_pion");

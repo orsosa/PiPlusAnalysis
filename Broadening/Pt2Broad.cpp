@@ -87,6 +87,7 @@ int main(int argc, char **argv){
 	if(argc < 24){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 		std::cout << argc << std::endl;
+		return 0;
 	}
 	
 	Q2_MIN = (Double_t) std::stod(argv[1]);
@@ -150,7 +151,7 @@ int main(int argc, char **argv){
         else v_PHI[i] = v_PHI[i-1] + delta_PHI;
     }
 
-	TFile *f = new TFile("pt2.root", "READ");
+	TFile *f = new TFile("/home/rodrigo/Data/GITData/PT2/pt2.root", "READ");
 	
 	Double_t mean[6];
 	Double_t mean_err[6];
@@ -171,6 +172,8 @@ int main(int argc, char **argv){
 	TH1F *h_rc;
 	TCanvas *MyC;
 	TPad *S;
+	
+	Int_t noHist = 0;
 
 	for(q2i = 0; q2i < N_Q2; q2i++){
 		for(xbi = 0; xbi < N_XB; xbi++){
@@ -179,11 +182,26 @@ int main(int argc, char **argv){
 					if(met == 0) Metal = "C"; 
 					else if(met == 1) Metal = "Fe";
 					else if(met == 2) Metal = "Pb";
-					else if(met == 3) Metal = "DC";
-					else if(met == 4) Metal = "DFe";
-					else Metal = "DPb";
+					else if(met == 3) Metal = "D";
+					else if(met == 4) Metal = "D";
+					else Metal = "D";
 					
-					h = (TH1F*) (f->Get((const char*)Form("%s_hist_%d%d%d", (const char*) Metal, q2i, xbi, zhi)));
+					if(met < 3){
+						std::cout << "Reading hist " << Metal << "_hist_" << q2i << xbi << zhi << std::endl;
+						h = (TH1F*) f->Get((const char*)Form("%s_hist_%d%d%d", (const char*) Metal, q2i, xbi, zhi));
+						if(h == 0){
+							noHist = 1;
+							break;
+						}
+					}
+					else{
+						std::cout << "Reading hist " << Metal << "_hist_" << q2i << xbi << zhi << ";" << met - 2 <<std::endl;
+						h = (TH1F*) f->Get((const char*)Form("%s_hist_%d%d%d;%d", (const char*) Metal, q2i, xbi, zhi, met - 2));
+						if(h == 0){
+							noHist = 1;
+							break;
+						}
+					}
 					mean[met] = h->GetMean();
 					mean_err[met] = h->GetMeanError();
 					
@@ -193,6 +211,13 @@ int main(int argc, char **argv){
 						mean_err_rc[met] = h_rc->GetMeanError();						
 					}
 				}
+				
+				if(noHist){
+					noHist = 0;
+					continue;
+				}
+				
+				std::cout << "Finished getting the means" << std::endl;
 				
 				MyC = new TCanvas("MyC","transverse momuntum broadening of leading pions",6,21,1117,499);
 				MyC->SetFillColor(42);
@@ -264,27 +289,28 @@ int main(int argc, char **argv){
 				S->Update();
 		
 				gr25->Draw("P:same");
-				
+				if(RCOn) gr25_rc->Draw("P:same");
+								
 				TMarker *m1 = new TMarker(x25[0],y25[0],21);
 				m1->SetMarkerColor(2);
 				m1->Draw("same");
-				TMarker *m1_rc = new TMarker(x25_rc[0], y25_rc[0], 21);
-				m1_rc->SetMarkerColor(kBlue);
-				m1_rc->Draw("same");				
-
 				TMarker *m2 = new TMarker(x25[1],y25[1],23);
 				m2->SetMarkerColor(2);
 				m2->Draw("same");
-				TMarker *m2_rc = new TMarker(x25_rc[1], y25_rc[1], 23);
-				m2_rc->SetMarkerColor(kBlue);
-				m2_rc->Draw("same");
-
 				TMarker *m3 = new TMarker(x25[2],y25[2],8);
 				m3->SetMarkerColor(2);
 				m3->Draw("same");
-				TMarker *m3_rc = new TMarker(x25_rc[2], y25_rc[2], 8);
-				m3_rc->SetMarkerColor(kBlue);
-				m3_rc->Draw("same");
+				if(RCOn){
+					TMarker *m1_rc = new TMarker(x25_rc[0], y25_rc[0], 21);
+					m1_rc->SetMarkerColor(kBlue);
+					m1_rc->Draw("same");								
+					TMarker *m2_rc = new TMarker(x25_rc[1], y25_rc[1], 23);
+					m2_rc->SetMarkerColor(kBlue);
+					m2_rc->Draw("same");
+					TMarker *m3_rc = new TMarker(x25_rc[2], y25_rc[2], 8);
+					m3_rc->SetMarkerColor(kBlue);
+					m3_rc->Draw("same");
+				}				
 			
 				S->Update();
 				TGraph *gr1 = new TGraph();
@@ -293,9 +319,9 @@ int main(int argc, char **argv){
 				gr1->SetMarkerStyle(21);
 				gr2->SetMarkerStyle(23);
 				gr3->SetMarkerStyle(8);
-				gr1->SetMarkerColor(4);
-				gr2->SetMarkerColor(4);
-				gr3->SetMarkerColor(4);
+				gr1->SetMarkerColor(kRed);
+				gr2->SetMarkerColor(kRed);
+				gr3->SetMarkerColor(kRed);
 				gr1->SetMarkerSize(2.5);
 				gr2->SetMarkerSize(2.5);
 				gr3->SetMarkerSize(2.5);
@@ -332,23 +358,8 @@ int main(int argc, char **argv){
 				MyC->Update();
 				MyC->SaveAs(name1);	
 				
-				delete MyC;
-				delete S;
-				delete gr25;
-				delete gr25_rc;
-				delete Graph4;
-				delete tex1;
-				delete m1;
-				delete m1_rc;
-				delete m2;
-				delete m2_rc;
-				delete m3;
-				delete m3_rc;
-				delete gr1;
-				delete gr2;
-				delete gr3;
-				delete legend;
-				delete tex;				
+				std::cout << "Deleting Pointers" << std::endl;				
+				std::cout << "After Deleting Pointers" << std::endl;		
 
 				out << pt2b_rc[0] << "\t\t" << pt2b_err_rc[0] << "\t\t" << pt2b_rc[1] << "\t\t" << pt2b_err_rc[1] << "\t\t" << pt2b_rc[2] << "\t\t" << pt2b_err_rc[2] << std::endl;
 			}	

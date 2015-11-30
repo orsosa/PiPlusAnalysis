@@ -151,7 +151,7 @@ int main(int argc, char **argv){
         else v_PHI[i] = v_PHI[i-1] + delta_PHI;
     }
 
-	TFile *f = new TFile("/home/rodrigo/Data/GITData/PT2/pt2.root", "READ");
+	TFile *f = new TFile("/home/rodrigo/Data/GITData/PT2/Neg/pt2.root", "READ");
 	
 	Double_t mean[6];
 	Double_t mean_err[6];
@@ -173,34 +173,27 @@ int main(int argc, char **argv){
 	TCanvas *MyC;
 	TPad *S;
 	
+	MyC = new TCanvas("MyC","transverse momuntum broadening of leading pions",6,21,1117,499);
+	
 	Int_t noHist = 0;
 
 	for(q2i = 0; q2i < N_Q2; q2i++){
 		for(xbi = 0; xbi < N_XB; xbi++){
 			for(zhi = 0; zhi < N_ZH; zhi++){
+				if(q2i == 3 && xbi == 2 && zhi == 3) continue;
 				for(met = 0; met < N_METAL; met++){
 					if(met == 0) Metal = "C"; 
 					else if(met == 1) Metal = "Fe";
 					else if(met == 2) Metal = "Pb";
-					else if(met == 3) Metal = "D";
-					else if(met == 4) Metal = "D";
-					else Metal = "D";
+					else if(met == 3) Metal = "DC";
+					else if(met == 4) Metal = "DFe";
+					else Metal = "DPb";
 					
-					if(met < 3){
-						std::cout << "Reading hist " << Metal << "_hist_" << q2i << xbi << zhi << std::endl;
-						h = (TH1F*) f->Get((const char*)Form("%s_hist_%d%d%d", (const char*) Metal, q2i, xbi, zhi));
-						if(h == 0){
-							noHist = 1;
-							break;
-						}
-					}
-					else{
-						std::cout << "Reading hist " << Metal << "_hist_" << q2i << xbi << zhi << ";" << met - 2 <<std::endl;
-						h = (TH1F*) f->Get((const char*)Form("%s_hist_%d%d%d;%d", (const char*) Metal, q2i, xbi, zhi, met - 2));
-						if(h == 0){
-							noHist = 1;
-							break;
-						}
+					std::cout << "Reading hist " << Metal << "_hist_" << q2i << xbi << zhi << std::endl;
+					h = (TH1F*) f->Get((const char*)Form("%s_hist_%d%d%d", (const char*) Metal, q2i, xbi, zhi));
+					if(h == 0){
+						noHist = 1;
+						break;
 					}
 					mean[met] = h->GetMean();
 					mean_err[met] = h->GetMeanError();
@@ -219,12 +212,13 @@ int main(int argc, char **argv){
 				
 				std::cout << "Finished getting the means" << std::endl;
 				
-				MyC = new TCanvas("MyC","transverse momuntum broadening of leading pions",6,21,1117,499);
 				MyC->SetFillColor(42);
 				MyC->SetGrid();
 				MyC->GetFrame()->SetFillColor(21);
 				MyC->GetFrame()->SetBorderSize(12);
 				MyC->Update();
+				
+				std::cout << "Creating Pag" << std::endl;
 				S = new TPad("S", "transverse momuntum broadening of leading pions",0,0.160072,1,1);
 				S->Draw();
 				S->cd();
@@ -357,6 +351,8 @@ int main(int argc, char **argv){
 				MyC->Modified();
 				MyC->Update();
 				MyC->SaveAs(name1);	
+				
+				MyC->Clear();
 				
 				std::cout << "Deleting Pointers" << std::endl;				
 				std::cout << "After Deleting Pointers" << std::endl;		

@@ -300,7 +300,7 @@ void run_file(TString Metal, Double_t Q2_MIN, Double_t Q2_MAX, Double_t XB_MIN, 
 
 	TCut Pt2_cut = Form("Pt*Pt < %f", upper_lim);
 	cuts = cuts && Pt2_cut;
-	cuts_simul = cuts && Pt2_cut;
+	cuts_simul = cuts_simul && Pt2_cut;
 
 	fntuple->Draw(">>list", cuts, "goff");
 	fntuple->SetEventList((TEventList*)gDirectory->Get("list"));

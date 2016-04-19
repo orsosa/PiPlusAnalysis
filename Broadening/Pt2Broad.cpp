@@ -47,8 +47,9 @@ Int_t N_ZH;
 Int_t N_PT;
 Int_t N_PHI;
 
-//This should be changed later to pass as a input 
 Int_t RCOn = 0;
+Int_t XF_POS = 0;
+//This should be changed later to pass as a input 
 Double_t PT2_MIN = 0;
 Double_t PT2_MAX = 3;
 Int_t N_PT2 = 30;
@@ -80,10 +81,6 @@ int main(int argc, char **argv){
 	Int_t met;
 	TString Metal;
 	
-	for(Int_t i = 0; i < argc; i++){
-		std::cout << "Arg " << i << std::endl;
-		std::cout << argv[i] << std::endl;
-	}
 	if(argc < 24){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 		std::cout << argc << std::endl;
@@ -114,6 +111,28 @@ int main(int argc, char **argv){
 	fSimuExt = (TString) argv[21];
 	elecExt = (TString) argv[22];
 	pionExt = (TString) argv[23];
+	
+	RCOn = (Int_t) std::stoi(argv[24]);
+	XF_POS = (Int_t) std::stoi(argv[25]);	
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
+	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
+	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
+	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;	
+	std::cout << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << "Calculating Multiplicity Ratio depending on " << depVar << std::endl;
+	if(RCon)
+		std::cout << "Applying Radiative Correction: Yes" << std::cout;
+	else
+		std::cout << "Applying Radiative Correction: No" << std::cout;
+	if(XF_POS == 1)
+		std::cout << "Applying Feynman Cut: Positive" << std::cout;
+	else if(XF_POS == -1) 
+		std::cout << "Applying Feynman Cut: Negative" << std::cout;	
+	
 	
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;

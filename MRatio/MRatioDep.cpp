@@ -79,10 +79,6 @@ void runSimulVar(TString depVar, TString Metal);
 void GetNel(TString Metal, Double_t Xb_min, Double_t Xb_max, Double_t Q2_min, Double_t Q2_max);
 
 int main(int argc, char **argv){
-	for(Int_t i = 0; i < argc; i++){
-		std::cout << "Arg " << i << std::endl;
-		std::cout << argv[i] << std::endl;
-	}
 	if(argc < 26){
 		std::cout << "The number of arguments is incorrect" << std::endl;
 		std::cout << argc << std::endl;
@@ -119,6 +115,25 @@ int main(int argc, char **argv){
 	RCOn = (Int_t) std::stoi(argv[26]);	
 
 	if(argc == 28) XF_POS = (Int_t) std::stoi(argv[27]);
+	
+	std::cout << "The following settings are being used" << std::endl;
+	std::cout << Q2_MIN << " < Q2 < " << Q2_MAX << ", N_Q2 = " << N_Q2 << std::endl;
+	std::cout << XB_MIN << " < Xb < " << XB_MAX << ", N_XB = " << N_XB << std::endl;
+	std::cout << ZH_MIN << " < Zh < " << ZH_MAX << ", N_ZH = " << N_ZH << std::endl;	
+	std::cout << PT_MIN << " < Pt < " << PT_MAX << ", N_PT = " << N_PT << std::endl;	
+	std::cout << PHI_MIN << " < Phi < " << PHI_MAX << ", N_PHI = " << N_PHI << std::endl;	
+	std::cout << std::endl;
+	std::cout << "Data Directory = " << dataLoc << std::endl;
+	std::cout << "Calculating Multiplicity Ratio depending on " << depVar << std::endl;
+	if(RCon)
+		std::cout << "Applying Radiative Correction: Yes" << std::cout;
+	else
+		std::cout << "Applying Radiative Correction: No" << std::cout;
+	if(XF_POS == 1)
+		std::cout << "Applying Feynman Cut: Positive" << std::cout;
+	else if(XF_POS == -1) 
+		std::cout << "Applying Feynman Cut: Negative" << std::cout;	
+		
 
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
 	delta_XB = (XB_MAX-XB_MIN)/N_XB;
@@ -592,7 +607,7 @@ void runDataVar(TString depVar, TString Metal){
 	else if(depVar == "Pt"){
 		N_VAR = N_PT;
 		N_1 = N_Q2; N_2 = N_XB;	N_3 = N_ZH;	N_4 = N_PHI;
-		var1 = "Xb"; var2 = "Xb"; var3 = "Zh"; var4 = "PhiPQ";
+		var1 = "Q2"; var2 = "Xb"; var3 = "Zh"; var4 = "PhiPQ";
 		depV_MIN = PT_MIN; depV_MAX = PT_MAX;
 		depVarcut = Form("%s>%f && %s<%f", (const char*)depVar, depV_MIN, (const char*)depVar, depV_MAX);
 		lim1 = v_Q2; lim2 = v_XB, lim3 = v_ZH; lim4 = v_PHI;
@@ -694,7 +709,7 @@ void runSimulVar(TString depVar, TString Metal){
 	else if(depVar == "Pt"){
 		N_VAR = N_PT;
 		N_1 = N_Q2; N_2 = N_XB;	N_3 = N_ZH;	N_4 = N_PHI;
-		var1 = "Xb"; var2 = "Xb"; var3 = "Zh"; var4 = "PhiPQ";
+		var1 = "Q2"; var2 = "Xb"; var3 = "Zh"; var4 = "PhiPQ";
 		depV_MIN = PT_MIN; depV_MAX = PT_MAX;
 		depVarcut = Form("%s>%f && %s<%f", (const char*)depVar, depV_MIN, (const char*)depVar, depV_MAX);
 		lim1 = v_Q2; lim2 = v_XB, lim3 = v_ZH; lim4 = v_PHI;

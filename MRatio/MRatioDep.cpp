@@ -42,7 +42,7 @@ Int_t N_PHI;
 
 TString depVar;
 
-Int_t RCOn;
+Int_t RCon;
 Int_t XF_POS = 0;
 
 Double_t delta_Q2;
@@ -112,7 +112,7 @@ int main(int argc, char **argv){
 
 	depVar = (TString) argv[25];
 
-	RCOn = (Int_t) std::stoi(argv[26]);	
+	RCon = (Int_t) std::stoi(argv[26]);	
 
 	if(argc == 28) XF_POS = (Int_t) std::stoi(argv[27]);
 	
@@ -126,13 +126,13 @@ int main(int argc, char **argv){
 	std::cout << "Data Directory = " << dataLoc << std::endl;
 	std::cout << "Calculating Multiplicity Ratio depending on " << depVar << std::endl;
 	if(RCon)
-		std::cout << "Applying Radiative Correction: Yes" << std::cout;
+		std::cout << "Applying Radiative Correction: Yes" << std::endl;
 	else
-		std::cout << "Applying Radiative Correction: No" << std::cout;
+		std::cout << "Applying Radiative Correction: No" << std::endl;
 	if(XF_POS == 1)
-		std::cout << "Applying Feynman Cut: Positive" << std::cout;
+		std::cout << "Applying Feynman Cut: Positive" << std::endl;
 	else if(XF_POS == -1) 
-		std::cout << "Applying Feynman Cut: Negative" << std::cout;	
+		std::cout << "Applying Feynman Cut: Negative" << std::endl;	
 		
 
 	delta_Q2 = (Q2_MAX-Q2_MIN)/N_Q2;
@@ -171,7 +171,7 @@ int main(int argc, char **argv){
 
 	Int_t NTot;
 
-	if(RCOn){
+	if(RCon){
 		NTot = N_XB*N_Q2*N_ZH*N_PT*N_PHI;
 		rcFactorC = new Float_t[NTot];
 		rcFactorFe = new Float_t[NTot];
@@ -339,21 +339,21 @@ void runVar(TString depVar){
                     hsC = new TH1F("hsC", "", nbins,low,up);
                     hC_cor = new TH1F("hC_cor","",nbins,low,up);
                     hC_cor_rc = new TH1F("hC_cor_rc", "", nbins, low, up);
-                    hsC->Divide(h_C_acc,h_C_thr,1,1);
+                    hsC->Divide(h_C_acc,h_C_thr,1,1,"B");
                     hC_cor->Divide(h_C_s,hsC,1,1);
                     hf_C_cor->Add(hC_cor,1);
                     
                     hsFe = new TH1F("hsFe","",nbins,low,up);
                     hFe_cor = new TH1F("hFe_cor","",nbins,low,up);
                     hFe_cor_rc = new TH1F("hFe_cor_rc", "", nbins, low, up);
-                    hsFe->Divide(h_Fe_acc,h_Fe_thr,1,1);
+                    hsFe->Divide(h_Fe_acc,h_Fe_thr,1,1,"B");
                     hFe_cor->Divide(h_Fe_s,hsFe,1,1);
                     hf_Fe_cor->Add(hFe_cor,1);
                     
                     hsPb = new TH1F("hsPb","",nbins,low,up);
                     hPb_cor = new TH1F("hPb_cor","",nbins,low,up);
                     hPb_cor_rc = new TH1F("hPb_cor_rc", "", nbins, low, up);
-                    hsPb->Divide(h_Pb_acc,h_Pb_thr,1,1);
+                    hsPb->Divide(h_Pb_acc,h_Pb_thr,1,1,"B");
                     hPb_cor->Divide(h_Pb_s,hsPb,1,1);
                     hf_Pb_cor->Add(hPb_cor,1);
                     
@@ -372,7 +372,7 @@ void runVar(TString depVar){
                     hf_D2Fe_cor->Add(hD2Fe_cor,1);
                     hf_D2Pb_cor->Add(hD2Pb_cor,1);                    
 
-					if(RCOn){
+					if(RCon){
 		                for(Int_t i = 0; i < N_VAR; i++){
 							if(depVar == "Q2"){
 								q2i = i; xbi = j; zhi = k; pti = l; phii = m;

@@ -164,81 +164,96 @@ int main(int argc, char **argv)
 
 void run_file(TString Metal, Double_t q2_min, Double_t q2_max, Double_t xb_min, Double_t xb_max, Double_t zh_min, Double_t zh_max, Double_t pt_min, Double_t pt_max)
 {	
-	TString MetalD;
-    TCut Q2_cut = Form("Q2>%f && Q2<%f", q2_min, q2_max);
-    TCut Xb_cut = Form("Xb>%f && Xb<%f", xb_min, xb_max);
-    TCut Zh_cut = Form("Zh>%f && Zh<%f", zh_min, zh_max);
-    TCut Pt_cut = Form("Pt>%f && Pt<%f", pt_min, pt_max);
-	TCut Xf_cut;
-	if(XF_POS == 0) Xf_cut = Form("Xf<0 || Xf>0");
-	if(XF_POS == 1) Xf_cut = Form("Xf>0");
-	if(XF_POS == -1) Xf_cut = Form("Xf<0");
-	TCut Target_cut;
-	if(Metal(0,1) == "D")
-    	Target_cut = Form("TargType==%d", 1);
-	else
-		Target_cut = Form("TargType==%d", 2);
-
-    TCut cuts = Q2_cut && Xb_cut && Zh_cut && Pt_cut && Xf_cut && Target_cut;
-    TCut cuts_simul = Q2_cut && Xb_cut && Zh_cut&& Pt_cut && Xf_cut;
-
-	TChain *fntuple, *faccept, *fthrown;
-	
-	if(Metal(0,1) != "D"){
-		fntuple = new TChain("data_pion");
-		fntuple->Add(dataLoc + Metal + fDataExt + pionExt);
-		faccept = new TChain("accept_pion");
-		for(Int_t q = 0; q < nSimuFiles; q++)
-			faccept->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
-		fthrown = new TChain("thrown_pion");
-		for(Int_t q = 0; q < nSimuFiles; q++)
-			fthrown->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);		
-	}
-	else{
-		MetalD = Metal(1,2);
-		fntuple = new TChain("data_pion");
-		fntuple->Add(dataLoc + MetalD + fDataExt + pionExt);
-		faccept = new TChain("accept_pion");
-		for(Int_t q = 0; q < nSimuFiles; q++)
-			faccept->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
-		fthrown = new TChain("thrown_pion");
-		for(Int_t q = 0; q < nSimuFiles; q++)
-			fthrown->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
-	}	
-	
-    fntuple->Draw(">>list", cuts, "goff");
-    fntuple->SetEventList((TEventList*) gDirectory->Get("list"));   
-
-    faccept->Draw(">>list_acc",cuts_simul,"goff");
-    faccept->SetEventList((TEventList*) gDirectory->Get("list_acc"));
-
-    fthrown->Draw(">>list_thr", cuts_simul, "goff");
-    fthrown->SetEventList((TEventList*)gDirectory->Get("list_thr"));
-
-    fntuple->Draw((const char*)Form("PhiPQ>>htmp_data(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
-    TH1F *htmp_data = (TH1F*)gDirectory->GetList()->FindObject("htmp_data");
-    htmp_data->Sumw2();
-    faccept->Draw((const char*)Form("PhiPQ>>htmp_acc(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
-    TH1F *htmp_acc = (TH1F*)gDirectory->GetList()->FindObject("htmp_acc");
-    htmp_acc->Sumw2();
-    fthrown->Draw((const char*)Form("PhiPQ>>htmp_thr(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
-    TH1F *htmp_thr = (TH1F*)gDirectory->GetList()->FindObject("htmp_thr");
-    htmp_thr->Sumw2();
-    TH1F *htmp_acc_ratio = new TH1F("htmp_acc_ratio", "", N_PHI, PHI_MIN, PHI_MAX);
-    TH1F *htmp_data_corr = new TH1F("htmp_data_corr", "", N_PHI, PHI_MIN, PHI_MAX);
-    htmp_acc_ratio->Divide(htmp_acc,htmp_thr,1,1,"B");
-    htmp_data_corr->Divide(htmp_data,htmp_acc_ratio,1,1);
+  TString MetalD;
+  TCut Q2_cut = Form("Q2>%f && Q2<%f", q2_min, q2_max);
+  TCut Xb_cut = Form("Xb>%f && Xb<%f", xb_min, xb_max);
+  TCut Zh_cut = Form("Zh>%f && Zh<%f", zh_min, zh_max);
+  TCut Pt_cut = Form("Pt>%f && Pt<%f", pt_min, pt_max);
+  TCut Xf_cut;
+  if(XF_POS == 0) Xf_cut = Form("Xf<0 || Xf>0");
+  if(XF_POS == 1) Xf_cut = Form("Xf>0");
+  if(XF_POS == -1) Xf_cut = Form("Xf<0");
+  TCut Target_cut;
+  if(Metal(0,1) == "D")
+    Target_cut = Form("TargType==%d", 1);
+  else
+    Target_cut = Form("TargType==%d", 2);
+  
+  TCut cuts = Q2_cut && Xb_cut && Zh_cut && Pt_cut && Xf_cut && Target_cut;
+  TCut cuts_simul = Q2_cut && Xb_cut && Zh_cut&& Pt_cut && Xf_cut;
+  
+  TChain *fntuple, *faccept, *fthrown;
+  
+  if(Metal(0,1) != "D"){
+    //		fntuple = new TChain("data_pion");
+    fntuple = new TChain("ntuple_data");
     
-    for(Int_t ii = 1; ii <= N_PHI; ii++){
-        Float_t PhiVal = PHI_MIN + (ii-0.5)*delta_PHI;
-        Float_t Val = htmp_data_corr->GetBinContent(ii);
-        Float_t Err = htmp_data_corr->GetBinError(ii);
-        fit_data->Fill((q2_min+q2_max)/2., (xb_min+xb_max)/2., (zh_min+zh_max)/2., (pt_min+pt_max)/2., PhiVal, Val, Err);
-    }
-    
-    delete htmp_acc_ratio;
-    delete htmp_data_corr;
-	delete fntuple;
-	delete faccept;
-	delete fthrown;    
+    fntuple->Add(dataLoc + Metal + fDataExt + pionExt);
+    //	faccept = new TChain("accept_pion");
+    faccept = new TChain("ntuple_accept");
+    for(Int_t q = 0; q < nSimuFiles; q++)
+      faccept->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
+    //		fthrown = new TChain("thrown_pion");
+    fthrown = new TChain("ntuple_thrown");
+    for(Int_t q = 0; q < nSimuFiles; q++)
+      fthrown->Add(dataLoc + Metal + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);		
+  }
+  else{
+    MetalD = Metal(1,2);
+    //		fntuple = new TChain("data_pion");
+    fntuple = new TChain("ntuple_data");
+    fntuple->Add(dataLoc + MetalD + fDataExt + pionExt);
+    //		faccept = new TChain("accept_pion");
+    faccept = new TChain("ntuple_accept");
+    for(Int_t q = 0; q < nSimuFiles; q++)
+      faccept->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
+    //		fthrown = new TChain("thrown_pion");
+    fthrown = new TChain("ntuple_thrown");
+    for(Int_t q = 0; q < nSimuFiles; q++)
+      fthrown->Add(dataLoc + Metal(0,1) + std::to_string(static_cast<long long>(q+1)) + fSimuExt + pionExt);
+  }	
+
+  fthrown->SetAlias("Xb","Q2/2./Nu/0.938272");
+  faccept->SetAlias("Xb","Q2/2./Nu/0.938272");
+
+  fntuple->Draw(">>list", cuts, "goff");
+  fntuple->SetEventList((TEventList*) gDirectory->Get("list"));   
+  
+
+  faccept->Draw(">>list_acc",cuts_simul,"goff");
+  faccept->SetEventList((TEventList*) gDirectory->Get("list_acc"));
+
+
+  fthrown->Draw(">>list_thr", cuts_simul, "goff");
+  fthrown->SetEventList((TEventList*)gDirectory->Get("list_thr"));
+
+  fntuple->Draw((const char*)Form("PhiPQ>>htmp_data(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
+  TH1F *htmp_data = (TH1F*)gDirectory->GetList()->FindObject("htmp_data");
+  htmp_data->Sumw2();
+
+  faccept->Draw((const char*)Form("PhiPQ>>htmp_acc(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
+  TH1F *htmp_acc = (TH1F*)gDirectory->GetList()->FindObject("htmp_acc");
+  htmp_acc->Sumw2();
+
+  fthrown->Draw((const char*)Form("PhiPQ>>htmp_thr(%d,%f,%f)", N_PHI, PHI_MIN, PHI_MAX), "", "goff");
+  TH1F *htmp_thr = (TH1F*)gDirectory->GetList()->FindObject("htmp_thr");
+  htmp_thr->Sumw2();
+
+  TH1F *htmp_acc_ratio = new TH1F("htmp_acc_ratio", "", N_PHI, PHI_MIN, PHI_MAX);
+  TH1F *htmp_data_corr = new TH1F("htmp_data_corr", "", N_PHI, PHI_MIN, PHI_MAX);
+  htmp_acc_ratio->Divide(htmp_acc,htmp_thr,1,1,"B");
+  htmp_data_corr->Divide(htmp_data,htmp_acc_ratio,1,1);
+  
+  for(Int_t ii = 1; ii <= N_PHI; ii++){
+    Float_t PhiVal = PHI_MIN + (ii-0.5)*delta_PHI;
+    Float_t Val = htmp_data_corr->GetBinContent(ii);
+    Float_t Err = htmp_data_corr->GetBinError(ii);
+    fit_data->Fill((q2_min+q2_max)/2., (xb_min+xb_max)/2., (zh_min+zh_max)/2., (pt_min+pt_max)/2., PhiVal, Val, Err);
+  }
+  
+  delete htmp_acc_ratio;
+  delete htmp_data_corr;
+  delete fntuple;
+  delete faccept;
+  delete fthrown;    
 }

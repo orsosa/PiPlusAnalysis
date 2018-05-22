@@ -7,7 +7,7 @@ class THapradConfig;
 class TKinematicalVariables;
 class TLorentzInvariants;
 class THadronKinematics;
-
+class TRV2TR;
 
 class TRadCor {
 public:

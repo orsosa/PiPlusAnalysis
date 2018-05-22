@@ -20,3 +20,6 @@ setenv LD_LIBRARY_PATH ${ANALYSER}/slib:$${LD_LIBRARY_PATH}
 To compile HAPRAD_CPP it is necessary to have libMathMore in root, to do this libgsl need to be installed and
 in configure set --enable-gsl-shared
 (make sure configure output is "Checking whether to build libMathMore ... yes")  
+* cernlib
+* pdflib804 (libpdflib804-2-dev)
+* phtools (libphtools2-dev)

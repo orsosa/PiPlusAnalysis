@@ -10,12 +10,12 @@ class TLorentzInvariants;
 class THadronKinematics;
 
 
-class TRV2TR : public ROOT::Math::IBaseFunctionMultiDim {
+class TRV2TR : public ROOT::Math::IBaseFunctionMultiDimTempl<double> {
 public:
     TRV2TR(const TRadCor* rc);
     ~TRV2TR();
 
-    virtual IBaseFunctionMultiDim* Clone() const;
+    virtual IBaseFunctionMultiDimTempl<double>* Clone() const;
     virtual unsigned int NDim() const;
 
 private:

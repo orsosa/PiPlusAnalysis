@@ -17,9 +17,9 @@ CXXFLAGS  += -std=c++0x -O2 -Wall -fPIC $(ROOTCFLAGS)
 LD        = g++
 LDFLAGS   = -O2 $(ROOTLDFLAGS) -lgfortran -Wl,-rpath,$(HAPRAD_CPP)/slib
 
-INCLUDES  := -I/$(HAPRAD_CPP)
+INCLUDES  := -I$(HAPRAD_CPP)
 #LIBS      := -L/$(HAPRAD_CPP)/slib -lTRadCor $(ROOTLIBS) -lMathMore -L/usr/lib64/cernlib/2006/lib/ $(CERNLIBS)
-LIBS      := -L/$(HAPRAD_CPP)/slib -lTRadCor $(ROOTLIBS) -lMathMore -L/opt/cern/pro/lib/ $(CERNLIBS)
+LIBS      := -L$(HAPRAD_CPP)/slib -lTRadCor $(ROOTLIBS) -lMathMore -L/opt/cern/pro/lib/ $(CERNLIBS)
 ##############################################################################
 all: genRC
 
